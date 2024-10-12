@@ -15,9 +15,30 @@ public class Joke extends BaseTimeEntity {
     private long id;
     private String question;
     private String answer;
+    private boolean called;
+
+    public void updateCalled() {
+        this.called = true;
+    }
 
     public Joke(String question, String answer) {
         this.question = question;
         this.answer = answer;
+    }
+
+    public Joke(String question, String answer, boolean called) {
+        this.question = question;
+        this.answer = answer;
+        this.called = called;
+    }
+
+    @Override
+    public String toString() {
+        return "Joke{" +
+                "id=" + id +
+                ", question='" + question + '\'' +
+                ", answer='" + answer + '\'' +
+                ", called=" + called +
+                '}';
     }
 }

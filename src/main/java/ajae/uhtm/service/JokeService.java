@@ -1,5 +1,7 @@
-package ajae.uhtm;
+package ajae.uhtm.service;
 
+import ajae.uhtm.CsvReader;
+import ajae.uhtm.repository.JokeRepository;
 import ajae.uhtm.entity.Joke;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
