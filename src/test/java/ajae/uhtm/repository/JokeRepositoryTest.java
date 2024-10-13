@@ -101,4 +101,12 @@ class JokeRepositoryTest {
         System.out.println("byCalledFalse = " + byCalledFalse);
     }
 
+    @Test
+    void queryDSL테스트() {
+        Joke joke = jokeRepository.selectJokeById(10L);
+        log.info("joke: {}", joke.getId());
+        log.info("joke: {}", joke.getQuestion());
+        log.info("joke: {}", joke.getAnswer());
+    }
+
 }

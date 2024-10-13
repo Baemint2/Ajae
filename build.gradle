@@ -61,6 +61,21 @@ tasks.named('asciidoctor') {
     dependsOn test
 }
 
+
+def generated = 'build/generated/querydsl'
+// def generated = 'src/main/generated'
+
+
 clean {
     delete file('src/main/generated')
+    delete file(generated)
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
+
+sourceSets {
+    main.java.srcDirs += [ generated ]
+}
+

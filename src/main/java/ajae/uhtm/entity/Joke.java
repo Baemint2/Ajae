@@ -1,5 +1,6 @@
 package ajae.uhtm.entity;
 
+import ajae.uhtm.JokeDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,13 +33,7 @@ public class Joke extends BaseTimeEntity {
         this.called = called;
     }
 
-    @Override
-    public String toString() {
-        return "Joke{" +
-                "id=" + id +
-                ", question='" + question + '\'' +
-                ", answer='" + answer + '\'' +
-                ", called=" + called +
-                '}';
+    public JokeDto toDto() {
+        return new JokeDto(this.question, this.answer);
     }
 }
