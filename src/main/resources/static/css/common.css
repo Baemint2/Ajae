@@ -29,25 +29,3 @@ main {
     box-sizing: border-box;
     flex-grow: 1;
 }
-
-.navbar {
-    width: 100%;
-    font-size: 2rem;
-}
-
-.navbar img {
-    width: 100px;
-}
-
-.nav-header {
-    border-bottom: 1px solid;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-}
-
-.menu-wrap img {
-    width: 32px;
-    height: 32px;
-    margin-right: 20px;
-}

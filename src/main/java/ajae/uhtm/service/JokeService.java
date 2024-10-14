@@ -42,8 +42,9 @@ public class JokeService {
 
         int size = byCalledFalse.size();
         long rand = new Random().nextLong(size) + 1;
+        log.info("[getJoke] : {}", rand);
         Joke joke = jokeRepository.findByIdAndCalledFalse(rand);
-
+        log.info("[getJoke] : {}", joke);
         joke.updateCalled();
         jokeRepository.save(joke);
 

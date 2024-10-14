@@ -6,7 +6,6 @@
 
 #joke-container {
     text-align: center;
-    margin-bottom: 200px;
 }
 
 #question {
@@ -25,7 +24,5 @@ button {
 
 h1 {
     height: 150px;
-    display: flex;
-    font-size: 3rem;
     text-align: center;
 }

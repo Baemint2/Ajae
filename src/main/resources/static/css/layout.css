@@ -1,0 +1,20 @@
+/* navbar */
+.nav-header {
+    border-bottom: 1px solid;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+/* 좌측 이미지 사이즈 */
+.navbar img {
+    width: 100px;
+}
+
+/* 우측 메뉴 아이콘 */
+.menu-wrap img {
+    width: 32px;
+    height: 32px;
+    margin-right: 20px;
+    margin-bottom: 15px;
+}

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>웃음 한 스푼</title>
-    <link rel="icon" href="/icons/favicon/favicon-32x32.png">
-    <link rel="manifest" href="/manifest.json">
-    <link href="/css/common.css">
+    <head>
+        <th:block th:insert="~{layout/header :: header('웃음 한 스푼')}"></th:block>
+    </head>
 </head>
 <body>
-<img src="/icons/favicon/apple-icon-180x180.png">
+<nav th:replace="~{layout/navbar :: navbar}"></nav>
+<main>
+    <div class="index">
+        <a href="/joke">오늘의 개-그</a>
+    </div>
+</main>
 </body>
 </html>
