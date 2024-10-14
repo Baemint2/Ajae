@@ -8,17 +8,17 @@
   "form_factor": "wide",
   "icons": [
     {
-      "src": "icons/favicon/apple-icon-144x144.png",
+      "src": "img/favicon/apple-icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "icons/favicon/apple-icon-152x152.png",
+      "src": "img/favicon/apple-icon-152x152.png",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "icons/favicon/apple-icon-180x180.png",
+      "src": "img/favicon/apple-icon-180x180.png",
       "sizes": "180x180",
       "type": "image/png"
     }

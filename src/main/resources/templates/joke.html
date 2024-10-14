@@ -1,19 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta name="viewport" charset="UTF-8" content="width=device-width, initial-scale=1.0">
     <title>Title</title>
     <link href="/css/joke.css" rel="stylesheet">
     <link href="/css/common.css" rel="stylesheet">
-    <link rel="icon" href="/icons/favicon/favicon-96x96.png">
+    <link rel="icon" href="/img/favicon/favicon-96x96.png">
     <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-<header>헤더 공간</header>
+<nav th:replace="~{layout/navbar :: navbar}"></nav>
     <main>
         <div class="joke">
+            <div class="fixed top-0 right-0 h-full w-0 bg-gray-800 overflow-hidden transition-all duration-300" id="sidebar">
+                <button class="absolute top-4 left-4 text-white text-2xl" id="close-button">&times;</button>
+                <ul class="mt-16 space-y-4 text-white">
+                    <li><a href="#" class="block px-4 py-2 hover:bg-gray-700">Home</a></li>
+                    <li><a href="#" class="block px-4 py-2 hover:bg-gray-700">About</a></li>
+                    <li><a href="#" class="block px-4 py-2 hover:bg-gray-700">Contact</a></li>
+                </ul>
+            </div>
+
             <div>
-                <h1>오늘의 개-그</h1>
+                <h1 class="text-3xl font-bold underline">오늘의 개-그</h1>
             </div>
             <div id="joke-container">
                 <div class="question-wrap">
