@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.util.Assert.isInstanceOf;
 
 @Slf4j
 @SpringBootTest
@@ -109,4 +112,37 @@ class JokeRepositoryTest {
         log.info("joke: {}", joke.getAnswer());
     }
 
+    @Test
+    void 문제_추가() {
+        String question = "노트북의 반대말은?";
+        String answer = "노트남";
+        Joke joke = Joke.builder()
+                .question(question)
+                .answer(answer)
+                .build();
+        jokeRepository.save(joke);
+
+        assertThat(joke.getQuestion()).isEqualTo(question);
+        assertThat(joke.getAnswer()).isEqualTo(answer);
+        log.info("joke: {}", joke.toString());
+    }
+
+    @Test
+    void 문제_중복_검증() {
+        String question = "노트북의 반대말은?";
+        String answer = "노트남";
+        Joke joke = Joke.builder()
+                .question(question)
+                .answer(answer)
+                .build();
+        List<Joke> findAll = jokeRepository.findAll();
+        boolean b = findAll.stream().anyMatch(findJoke -> findJoke.getQuestion().equals(question));
+        assertThrows(IllegalArgumentException.class, () -> {
+            if (b) {
+                throw new IllegalArgumentException("해당 문제는 이미 존재합니다.");
+            } else {
+                jokeRepository.save(joke);
+            }
+        });
+    }
 }

@@ -2,13 +2,13 @@ package ajae.uhtm.entity;
 
 import ajae.uhtm.JokeDto;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@ToString(of = {"question", "answer", "called"})
 public class Joke extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +22,7 @@ public class Joke extends BaseTimeEntity {
         this.called = true;
     }
 
+    @Builder
     public Joke(String question, String answer) {
         this.question = question;
         this.answer = answer;

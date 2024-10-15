@@ -22,4 +22,10 @@ class JokeServiceTest {
 
         joke.toString();
     }
+
+    @Test
+    void saveJoke() {
+        JokeDto request = new JokeDto("시가 현실적이면?", "시리얼");
+        Long l = jokeService.saveJoke(request);
+    }
 }

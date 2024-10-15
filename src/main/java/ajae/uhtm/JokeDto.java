@@ -1,10 +1,13 @@
 package ajae.uhtm;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JokeDto {
     private String question;
     private String answer;

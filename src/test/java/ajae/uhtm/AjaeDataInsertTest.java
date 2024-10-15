@@ -2,6 +2,7 @@ package ajae.uhtm;
 
 import ajae.uhtm.service.JokeService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,6 +20,7 @@ public class AjaeDataInsertTest {
 
 
     @Test
+    @Disabled
     void 데이터_삽입() {
         jokeService.importData(AjaeZipPath);
         log.info("");

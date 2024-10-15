@@ -52,4 +52,25 @@ public class JokeService {
         log.info("정답: {}", joke.getAnswer());
         return joke.toDto();
     }
+
+    @Transactional
+    public Long saveJoke(JokeDto jokeDto) {
+        Joke joke = Joke.builder()
+                .question(jokeDto.getQuestion())
+                .answer(jokeDto.getAnswer())
+                .build();
+
+        List<Joke> findAll = jokeRepository.findAll();
+        boolean b = findAll.stream().anyMatch(findJoke -> findJoke.getQuestion().equals(jokeDto.getQuestion()));
+
+        if(b) {
+            log.info("이미 존재하는 문제입니다.");
+            return 0L;
+        } else {
+            Joke save = jokeRepository.save(joke);
+            long id = save.getId();
+            log.info("[saveJoke] : {}", id);
+            return id;
+        }
+    }
 }
