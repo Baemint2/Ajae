@@ -93,11 +93,6 @@ tasks.withType(JavaCompile).configureEach {
     options.getGeneratedSourceOutputDirectory().set(file(generated))
 }
 
-sourceSets {
-    main.java.srcDirs += [ generated ]
-}
-
-
 asciidoctor {
     configurations 'asciidoctorExt' // (7)
     baseDirFollowsSourceFile() // (8)
