@@ -1,0 +1,14 @@
+1. 개그 조회
+
+**Request**
+include::{snippets}/rest-docs-test-controller-test/jokes/get/http-request.adoc[]
+
+**Response**
+include::{snippets}/rest-docs-test-controller-test/jokes/get/http-response.adoc[]
+**Body**
+
+** 실제 조회시엔 랜덤한 개그가 조회된다.
+
+include::{snippets}/rest-docs-test-controller-test/jokes/get/response-body.adoc[]
+include::{snippets}/rest-docs-test-controller-test/jokes/get/response-fields.adoc[]
+
