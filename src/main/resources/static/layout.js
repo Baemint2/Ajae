@@ -1,3 +1,5 @@
+let userInfoFetched = false;
+
 const layout = {
     init: function () {
         this.setupEvent();
@@ -20,6 +22,11 @@ const layout = {
 
         // 사이드바 열기 함수
         const openSidebar = () => {
+            if(!userInfoFetched) {
+                getUserInfo();
+                userInfoFetched = true;
+            }
+
             sidebar.classList.remove('w-0');
             sidebar.classList.add('w-64'); // 사이드바 너비 변경
         };
@@ -44,6 +51,26 @@ const layout = {
         });
     }
 }
+
+const getUserInfo = () => {
+    fetch("/api/v1/userInfo", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }).then(response => response.json())
+        .then(data => {
+            const userWrap = document.querySelector(".user-wrap")
+
+            const img = document.createElement("img");
+            img.src = data.profile;
+            img.alt = "User Profile";
+            img.className = "user-img";
+
+            userWrap.appendChild(img);
+        })
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     layout.init();
 });
