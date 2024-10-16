@@ -1,5 +1,6 @@
 package ajae.uhtm.service;
 
+import ajae.uhtm.UserDto;
 import ajae.uhtm.entity.ProviderType;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.repository.UserRepository;
@@ -12,8 +13,9 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User findByUsername(String username){
-        return userRepository.findByProviderKey(username);
+    public UserDto findByUsername(String username){
+        User user = userRepository.findByProviderKey(username);
+        return user.toDto();
     }
 
     public User saveUserIfNotExist(String providerId, String email, String nickname, String profile, ProviderType providerType) {

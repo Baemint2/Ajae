@@ -6,7 +6,6 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString(of = {"question", "answer", "called"})
 public class Joke extends BaseTimeEntity {

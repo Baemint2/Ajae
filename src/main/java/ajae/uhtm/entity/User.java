@@ -1,5 +1,6 @@
 package ajae.uhtm.entity;
 
+import ajae.uhtm.UserDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -49,6 +50,15 @@ public class User extends BaseTimeEntity {
         this.isDeleted = isDeleted;
         this.lastLogin = lastLogin;
     }
+
+    public UserDto toDto() {
+        return UserDto.builder()
+                .email(email)
+                .nickname(nickname)
+                .profile(profile)
+                .build();
+    }
+
 
     @Override
     public String toString() {
