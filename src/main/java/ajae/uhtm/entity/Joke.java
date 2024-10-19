@@ -1,8 +1,11 @@
 package ajae.uhtm.entity;
 
-import ajae.uhtm.JokeDto;
+import ajae.uhtm.dto.JokeDto;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,6 +19,9 @@ public class Joke extends BaseTimeEntity {
     private String question;
     private String answer;
     private boolean called;
+
+    @OneToMany(mappedBy = "joke")
+    private List<Bookmark> jokeList = new ArrayList<>();
 
     public void updateCalled() {
         this.called = true;

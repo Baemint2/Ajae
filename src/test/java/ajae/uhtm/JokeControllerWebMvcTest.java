@@ -1,6 +1,7 @@
 package ajae.uhtm;
 
 import ajae.uhtm.controller.JokeController;
+import ajae.uhtm.dto.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.service.JokeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +31,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
 @WebMvcTest(JokeController.class)

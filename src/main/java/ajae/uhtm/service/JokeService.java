@@ -1,7 +1,7 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.CsvReader;
-import ajae.uhtm.JokeDto;
+import ajae.uhtm.dto.JokeDto;
 import ajae.uhtm.repository.JokeRepository;
 import ajae.uhtm.entity.Joke;
 import jakarta.transaction.Transactional;
@@ -41,9 +41,9 @@ public class JokeService {
         }
 
         int size = byCalledFalse.size();
-        long rand = new Random().nextLong(size) + 1;
+        int rand = new Random().nextInt(size);
         log.info("[getJoke] : {}", rand);
-        Joke joke = jokeRepository.findByIdAndCalledFalse(rand);
+        Joke joke = byCalledFalse.get(rand);
         log.info("[getJoke] : {}", joke);
         joke.updateCalled();
         jokeRepository.save(joke);

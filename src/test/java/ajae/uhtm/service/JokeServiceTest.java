@@ -1,6 +1,6 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.JokeDto;
+import ajae.uhtm.dto.JokeDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

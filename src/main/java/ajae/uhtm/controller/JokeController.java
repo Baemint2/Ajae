@@ -1,6 +1,6 @@
 package ajae.uhtm.controller;
 
-import ajae.uhtm.JokeDto;
+import ajae.uhtm.dto.JokeDto;
 import ajae.uhtm.service.JokeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

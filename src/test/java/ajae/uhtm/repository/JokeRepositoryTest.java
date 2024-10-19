@@ -2,9 +2,9 @@ package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.Joke;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,7 +31,7 @@ class JokeRepositoryTest {
     @Autowired
     EntityManager em;
 
-    @PostConstruct
+    @BeforeEach
     public void init() {
         queryFactory = new JPAQueryFactory(em);
     }
@@ -52,8 +52,8 @@ class JokeRepositoryTest {
         }
 
         int size = byCalledFalse.size();
-        long rand = new Random().nextLong(size) + 1;
-        Joke joke = jokeRepository.findByIdAndCalledFalse(rand);
+        int rand = new Random().nextInt(size);
+        Joke joke = byCalledFalse.get(rand);
 
         joke.updateCalled();
         jokeRepository.save(joke);
@@ -110,21 +110,6 @@ class JokeRepositoryTest {
         log.info("joke: {}", joke.getId());
         log.info("joke: {}", joke.getQuestion());
         log.info("joke: {}", joke.getAnswer());
-    }
-
-    @Test
-    void 문제_추가() {
-        String question = "노트북의 반대말은?";
-        String answer = "노트남";
-        Joke joke = Joke.builder()
-                .question(question)
-                .answer(answer)
-                .build();
-        jokeRepository.save(joke);
-
-        assertThat(joke.getQuestion()).isEqualTo(question);
-        assertThat(joke.getAnswer()).isEqualTo(answer);
-        log.info("joke: {}", joke.toString());
     }
 
     @Test

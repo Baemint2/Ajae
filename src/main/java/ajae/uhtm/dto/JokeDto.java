@@ -1,4 +1,4 @@
-package ajae.uhtm;
+package ajae.uhtm.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;
