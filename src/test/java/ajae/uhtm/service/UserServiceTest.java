@@ -1,0 +1,108 @@
+package ajae.uhtm.service;
+
+import ajae.uhtm.entity.User;
+import ajae.uhtm.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+
+import java.time.Instant;
+import java.util.Optional;
+
+import static ajae.uhtm.entity.QUser.user;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@Slf4j
+@SpringBootTest
+public class UserServiceTest {
+
+    @MockBean
+    UserService userService;
+
+    @MockBean
+    UserRepository userRepository;
+
+    @Autowired
+    BookmarkService bookmarkService;
+
+    @InjectMocks
+    OAuth2UserService oAuth2UserService;
+
+    @Mock
+    private DefaultOAuth2UserService delegate;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    String clientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    String clientSecret;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
+    String redirectUrl;
+
+//    @Test
+//    void getAllJoke() {
+//        User user = userRepository.findByProviderKey("3281236314");
+//        List<JokeDto> allJoke = userService.getAllJoke(user.getProviderKey());
+//        assertThat(allJoke).isNotNull();
+//
+//        for (JokeDto jokeDto : allJoke) {
+//            System.out.println("jokeDto = " + jokeDto);
+//        }
+//
+//        log.info("clientId: {}", clientId);
+//        log.info("clientSecret: {}", clientSecret);
+//        log.info("redirectUrl: {}", redirectUrl);
+//
+//    }
+
+    @Test
+    void test() {
+        OAuth2User oAuth2User = mock(OAuth2User.class);
+        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId("google")
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .redirectUri(redirectUrl)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .scope("profile", "email")
+                .tokenUri("https://oauth2.googleapis.com/token")
+                .authorizationUri("https://accounts.google.com/o/oauth2/auth")
+                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .userNameAttributeName("sub")
+                .clientName("Google")
+                .build();
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
+                "access-token",
+                Instant.now(),
+                Instant.now().plusSeconds(3600));
+
+        OAuth2UserRequest request = new OAuth2UserRequest(clientRegistration, accessToken);
+
+        User user = mock(User.class);
+
+        when(delegate.loadUser(request)).thenReturn(oAuth2User);
+
+        when(userRepository.findById(any())).thenReturn(Optional.of(user));
+
+        // When
+        oAuth2UserService.loadUser(request);
+
+        // Then
+        verify(userRepository, times(1)).findById(any());
+    }
+
+}

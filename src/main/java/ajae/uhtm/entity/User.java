@@ -1,6 +1,6 @@
 package ajae.uhtm.entity;
 
-import ajae.uhtm.UserDto;
+import ajae.uhtm.dto.UserDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,7 +24,7 @@ public class User extends BaseTimeEntity {
     private String email;
     private String profile;
     private String nickname;
-    private String role;
+    private Role role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "provider_type")
@@ -37,8 +39,15 @@ public class User extends BaseTimeEntity {
     @Column(name = "last_login_date")
     private LocalDateTime lastLogin;
 
+    @OneToMany(mappedBy = "user")
+    private List<Bookmark> bookmarks = new ArrayList<>();
+
+    public void changeLastLoginDate() {
+        this.lastLogin = LocalDateTime.now();
+    }
+
     @Builder
-    public User(String username, String password, String email, String profile, String nickname, String role, ProviderType providerType, String providerKey, boolean isDeleted, LocalDateTime lastLogin) {
+    public User(String username, String password, String email, String profile, String nickname, Role role, ProviderType providerType, String providerKey, boolean isDeleted, LocalDateTime lastLogin) {
         this.username = username;
         this.password = password;
         this.email = email;

@@ -1,6 +1,7 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.entity.ProviderType;
+import ajae.uhtm.entity.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,14 +30,14 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         log.info("oAuth2User: {}", oAuth2User.toString());
 
         // Role generate
-        List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
+        List<GrantedAuthority> authorities = AuthorityUtils.createAuthorityList("ROLE_" + Role.USER);
 
         // nameAttributeKey
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails()
                 .getUserInfoEndpoint()
                 .getUserNameAttributeName();
-
+        log.info("userNameAttributeName: {}", userNameAttributeName);
         switch (userRequest.getClientRegistration().getRegistrationId()) {
             case "naver":
                 return naverOauth(oAuth2User, authorities);
