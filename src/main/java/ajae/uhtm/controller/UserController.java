@@ -21,15 +21,13 @@ public class UserController {
 
     @GetMapping("/api/v1/userInfo")
     public ResponseEntity<?> getUserInfo(Principal principal) {
-        String name = principal.getName();
-        UserDto byUsername = userService.findByUsername(name);
-        return ResponseEntity.ok(byUsername);
-    }
 
-    @GetMapping("/api/v1/allJoke")
-    public ResponseEntity<?> getAllJokes(Principal principal) {
-        String name = principal.getName();
-        List<JokeDto> allJoke = userService.getAllJoke(name);
-        return ResponseEntity.ok(allJoke);
+        if (principal != null) {
+            String name = principal.getName();
+            UserDto byUsername = userService.findByUsername(name).toDto();
+            return ResponseEntity.ok(byUsername);
+        }
+        return ResponseEntity.badRequest().build();
+
     }
 }

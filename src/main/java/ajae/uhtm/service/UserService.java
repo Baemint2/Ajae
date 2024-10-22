@@ -21,16 +21,19 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final BookmarkService bookmarkService;
-
-    public UserDto findByUsername(String username){
-        User user = userRepository.findByProviderKey(username);
-        return user.toDto();
+    @Transactional
+    public User findByUsername(String username){
+        log.info("username: {}", username);
+        return userRepository.findByProviderKey(username)
+                            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
 
     @Transactional
     public User saveUserIfNotExist(String providerId, String email, String nickname, String profile, ProviderType providerType) {
-        User existUser = userRepository.findByProviderKey(providerId);
+        log.info("[saveUserIfNotExist] providerId: {}", providerId);
+        User existUser = userRepository.findByProviderKey(providerId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        System.out.println("[saveUserIfNotExist] = " + existUser);
         if(existUser == null) {
             User user = User.builder()
                     .email(email)
@@ -47,12 +50,5 @@ public class UserService {
         return existUser;
     }
 
-    public List<JokeDto> getAllJoke(String providerId) {
-        User user = userRepository.findByProviderKey(providerId);
-        List<Joke> bookmarks = bookmarkService.getBookmarks(user.getId());
 
-        return bookmarks.stream()
-                .map(Joke::toDto)
-                .toList();
-    }
 }

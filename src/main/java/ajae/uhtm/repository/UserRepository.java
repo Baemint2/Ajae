@@ -3,7 +3,9 @@ package ajae.uhtm.repository;
 import ajae.uhtm.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    User findByProviderKey(String providerKey);
+    Optional<User> findByProviderKey(String providerKey);
 }
