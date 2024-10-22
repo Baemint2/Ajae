@@ -1,9 +1,12 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
@@ -18,11 +21,35 @@ class BookmarkServiceTest {
     @Autowired
     BookmarkService bookmarkService;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    JokeService jokeService;
+
+    @Value("${provider-key.kakao}")
+    String kakaoKey;
+
+    @Value("${provider-key.naver}")
+    String naverKey;
+
     @Test
     void 북마크_호출() {
         List<Joke> bookmarks = bookmarkService.getBookmarks(3L);
         assertThat(bookmarks).isNotNull();
         System.out.println("bookmarks = " + bookmarks);
     }
+
+    @Test
+    @Transactional
+    void 북마크_저장() {
+        User user = userService.findByUsername(kakaoKey);
+        System.out.println("byUsername = " + user.toString());
+        Joke question = jokeService.findByQuestion("화를 제일 많이 내는 숫자는?");
+
+        long l = bookmarkService.addBookmark(question, user.getProviderKey());
+        System.out.println("l = " + l);
+    }
+
 
 }

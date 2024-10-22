@@ -33,5 +33,4 @@ public class Bookmark extends BaseTimeEntity{
         this.isDeleted = isDeleted;
     }
 
-
 }
