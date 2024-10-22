@@ -1,7 +1,10 @@
 const joke = {
     init: function() {
         setupJoke();
-    }
+        bookMark();
+        openAnswer();
+    },
+
 }
 
 
@@ -36,6 +39,48 @@ const setupJoke = () => {
         document.getElementById("answer").textContent = "A. " + savedJoke.answer;
     }
 }
+
+const openAnswer = () => {
+    const openAnswer = document.getElementById("openAnswer");
+    openAnswer.addEventListener("click", () => {
+        document.getElementById("answer").style.display = "block";
+        openAnswer.style.display = "none";
+    });
+}
+
+const bookMark = () => {
+    document.querySelector(".bookmark-wrap img").addEventListener("click", () => {
+        const joke = JSON.parse(localStorage.getItem("dailyJoke"));
+        console.log(JSON.stringify(joke));
+
+        fetch("/api/v1/bookmark", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json" // 서버가 JSON 형식을 기대하는 경우
+            },
+            body: JSON.stringify(joke) // joke를 JSON 형식으로 변환
+        })
+        .then(response => {
+            console.log(response);
+            return response.json()
+        })
+        .then(data => {
+            if(data.message) {
+                alert(data.message);
+                const emptyStar = document.querySelector(".empty_star");
+                emptyStar.style.display = "none";
+                const yellowStar = document.createElement("img");
+                yellowStar.src = "/img/yellow_star.png";
+                yellowStar.alt = "노란별";
+                document.querySelector(".bookmark-wrap").appendChild(yellowStar);
+            }
+        })
+        .catch(error => {
+        })
+    });
+}
+
+
 
 
 document.addEventListener("DOMContentLoaded", () => {

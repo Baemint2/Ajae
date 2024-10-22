@@ -17,7 +17,7 @@ class JokeServiceTest {
 
     @Test
     void getJoke() {
-        JokeDto joke = jokeService.getJoke();
+        JokeDto joke = jokeService.getRandomJoke();
         assertThat(joke).isNotNull();
 
         joke.toString();

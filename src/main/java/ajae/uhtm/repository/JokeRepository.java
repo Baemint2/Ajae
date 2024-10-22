@@ -16,4 +16,6 @@ public interface JokeRepository extends JpaRepository<Joke, Long>, QueryJokeRepo
     List<Joke> findByCalledFalse();
 
     Joke findByIdAndCalledFalse(long id);
+
+    Joke findByQuestion(String question);
 }

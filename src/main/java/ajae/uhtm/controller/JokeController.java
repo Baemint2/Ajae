@@ -21,13 +21,18 @@ public class JokeController {
 
     @GetMapping("/api/v1/joke")
     public ResponseEntity<JokeDto> getJoke(){
-        JokeDto joke = jokeService.getJoke();
+        JokeDto joke = jokeService.getRandomJoke();
         return ResponseEntity.ok().body(joke);
     }
 
-    @GetMapping("joke")
+    @GetMapping("/joke")
     public String joke() {
         return "joke";
+    }
+
+    @GetMapping("/addJoke")
+    public String addJoke() {
+        return "addJoke";
     }
 
     @PostMapping("/api/v1/joke")

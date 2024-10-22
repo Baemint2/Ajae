@@ -29,7 +29,7 @@ public class JokeService {
     }
 
     @Transactional
-    public JokeDto getJoke() {
+    public JokeDto getRandomJoke() {
         // false 사이즈를 구해서 rand
         List<Joke> byCalledFalse = jokeRepository.findByCalledFalse();
 
@@ -72,5 +72,10 @@ public class JokeService {
             log.info("[saveJoke] : {}", id);
             return id;
         }
+    }
+
+    @Transactional
+    public Joke findByQuestion (String question) {
+        return jokeRepository.findByQuestion(question);
     }
 }

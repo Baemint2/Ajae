@@ -60,7 +60,7 @@ class JokeControllerWebMvcTest {
     void RestDocsTest() throws Exception {
         // given: mock으로 고정된 값을 반환하게 설정
         JokeDto fixedJoke = new Joke("딸기가 직장을 잃으면?", "딸기 시럽").toDto();
-        when(jokeService.getJoke()).thenReturn(fixedJoke);  // getJoke() 호출 시 고정된 joke 객체를 반환
+        when(jokeService.getRandomJoke()).thenReturn(fixedJoke);  // getJoke() 호출 시 고정된 joke 객체를 반환
 
         // when & then
         mockMvc.perform(get("/api/v1/joke"))
