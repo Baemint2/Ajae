@@ -1,6 +1,7 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static ajae.uhtm.entity.QBookmark.bookmark;
+import static ajae.uhtm.entity.QJoke.joke;
+import static ajae.uhtm.entity.QUser.user;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -79,23 +82,41 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    void 북마크_체크() {
+    void 북마크_체크_true() {
         String providerKey = naverKey;
         User user = userRepository.findByProviderKey(providerKey)
                 .orElseThrow(IllegalStateException::new);
         Joke joke = jokeRepository.findById(72L).orElseThrow();
 
-        Bookmark bookmark = Bookmark.builder()
-                .user(user)
-                .joke(joke)
-                .build();
-        System.out.println("bookmark = " + bookmark.getUser());
-        Bookmark bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
-                .where(QJoke.joke.id.eq(joke.getId()),
-                        QUser.user.id.eq(user.getId()))
-                .fetchOne();
-        System.out.println("bookmark1 = " + bookmark1);
+        boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
+                .where(jokeEq(joke.getId()),
+                        userEq(user.getId()))
+                .fetchOne() != null;
 
+        assertTrue(bookmark1);
+    }
 
+    @Test
+    void 북마크_체크_false() {
+        String providerKey = naverKey;
+        User user = userRepository.findByProviderKey(providerKey)
+                .orElseThrow(IllegalStateException::new);
+        Joke joke = jokeRepository.findById(152L)
+                .orElseThrow(IllegalStateException::new);
+
+        boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
+                .where(jokeEq(joke.getId()),
+                        userEq(user.getId()))
+                .fetchOne() != null;
+
+        assertFalse(bookmark1);
+    }
+
+    private BooleanExpression jokeEq(Long jokeId) {
+        return joke.id != null ? joke.id.eq(jokeId) : null;
+    }
+
+    private BooleanExpression userEq(Long userId) {
+        return user.id != null ? user.id.eq(userId) : null;
     }
 }

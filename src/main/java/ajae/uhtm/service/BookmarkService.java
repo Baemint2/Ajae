@@ -48,4 +48,9 @@ public class BookmarkService {
                 .map(Joke::toDto)
                 .toList();
     }
+
+    public Boolean checkBookmark(String providerKey, Joke joke) {
+        User user = userService.findByUsername(providerKey);
+        return bookmarkRepository.checkBookmark(user.getId(), joke.getId());
+    }
 }

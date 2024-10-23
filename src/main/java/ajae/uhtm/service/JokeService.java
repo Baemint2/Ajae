@@ -78,4 +78,10 @@ public class JokeService {
     public Joke findByQuestion (String question) {
         return jokeRepository.findByQuestion(question);
     }
+
+    @Transactional
+    public Joke findById (Long id) {
+        return jokeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 개그입니다."));
+    }
 }

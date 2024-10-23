@@ -42,4 +42,12 @@ public class BookmarkController {
         List<JokeDto> allJoke = bookmarkService.getAllJoke(name);
         return ResponseEntity.ok(allJoke);
     }
+
+    @PostMapping("/api/v1/check")
+    public ResponseEntity<?> checkBookmark(@RequestBody JokeDto jokeDto,
+                                           Principal principal) {
+        String name = principal.getName();
+        Boolean result = bookmarkService.checkBookmark(name, jokeDto.toEntity());
+        return ResponseEntity.ok(result);
+    }
 }

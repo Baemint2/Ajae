@@ -1,5 +1,6 @@
 package ajae.uhtm.dto;
 
+import ajae.uhtm.entity.Joke;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +16,13 @@ public class JokeDto {
     public JokeDto(String question, String answer) {
         this.question = question;
         this.answer = answer;
+    }
+
+    public Joke toEntity() {
+        return Joke.builder()
+                .question(question)
+                .answer(answer)
+                .build();
     }
 
     @Override
