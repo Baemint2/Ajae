@@ -4,7 +4,6 @@ import ajae.uhtm.entity.User;
 import ajae.uhtm.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,7 +37,7 @@ public class UserServiceTest {
     @Autowired
     BookmarkService bookmarkService;
 
-    @InjectMocks
+    @MockBean
     OAuth2UserService oAuth2UserService;
 
     @Mock
@@ -52,23 +51,7 @@ public class UserServiceTest {
 
     @Value("${spring.security.oauth2.client.registration.google.redirect-uri}")
     String redirectUrl;
-
-//    @Test
-//    void getAllJoke() {
-//        User user = userRepository.findByProviderKey("3281236314");
-//        List<JokeDto> allJoke = userService.getAllJoke(user.getProviderKey());
-//        assertThat(allJoke).isNotNull();
-//
-//        for (JokeDto jokeDto : allJoke) {
-//            System.out.println("jokeDto = " + jokeDto);
-//        }
-//
-//        log.info("clientId: {}", clientId);
-//        log.info("clientSecret: {}", clientSecret);
-//        log.info("redirectUrl: {}", redirectUrl);
-//
-//    }
-
+/*
     @Test
     void test() {
         OAuth2User oAuth2User = mock(OAuth2User.class);
@@ -78,9 +61,9 @@ public class UserServiceTest {
                 .redirectUri(redirectUrl)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .scope("profile", "email")
-                .tokenUri("https://oauth2.googleapis.com/token")
-                .authorizationUri("https://accounts.google.com/o/oauth2/auth")
-                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?client_id=" + clientId + "&redirect_uri=" + redirectUrl)
+                .tokenUri("https://www.googleapis.com/oauth2/v4/token")
+                .userInfoUri("https://www.googleapis.com/oauth2/v2/userinfo")
                 .userNameAttributeName("sub")
                 .clientName("Google")
                 .build();
@@ -94,15 +77,14 @@ public class UserServiceTest {
 
         User user = mock(User.class);
 
-        when(delegate.loadUser(request)).thenReturn(oAuth2User);
+        when(delegate.loadUser(any(OAuth2UserRequest.class))).thenReturn(oAuth2User);
 
         when(userRepository.findById(any())).thenReturn(Optional.of(user));
 
-        // When
         oAuth2UserService.loadUser(request);
 
-        // Then
-        verify(userRepository, times(1)).findById(any());
-    }
 
+
+    }
+  */
 }

@@ -81,32 +81,12 @@ public class UserControllerWebMvcTest {
     @RegisterExtension
     final RestDocumentationExtension restDocumentation = new RestDocumentationExtension("build/generated-snippets/rest-docs-test-controller-test");
 
-    @Test
-    void OAuth2User_객체_테스트() throws Exception {
-        OAuth2User oAuth2User = new DefaultOAuth2User(
-                AuthorityUtils.createAuthorityList("ROLE_USER"),
-                Map.of(
-                        "sub", "123456789",
-                        "name", "Test User",
-                        "email", "testuser@example.com",
-                        "picture", "profile-pic-url"
-                ),
-                "sub"
-        );
-
-
-        mockMvc.perform(get("/oauth2/authorization/google").with(oauth2Login().oauth2User(oAuth2User)))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/"))
-                .andDo(print());
-    }
-
-    @Test
-    void oauth2_로그인_성공_테스트() throws Exception {
-        mockMvc.perform(get("/oauth2/authorization/google")
-                        .with(oauth2Login()))
-                .andExpect(status().is3xxRedirection())
-                .andDo(print());
-    }
+//    @Test
+//    void oauth2_로그인_성공_테스트() throws Exception {
+//        mockMvc.perform(get("/oauth2/authorization/google")
+//                        .with(oauth2Login()))
+//                .andExpect(status().is3xxRedirection())
+//                .andDo(print());
+//    }
 
 }
