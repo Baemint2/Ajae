@@ -6,6 +6,8 @@ import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +30,15 @@ public class UserController {
             return ResponseEntity.ok(byUsername);
         }
         return ResponseEntity.badRequest().build();
-
     }
+
+    @GetMapping("/api/v1/loginCheck")
+    public Boolean loginCheck(Principal principal) {
+        OAuth2User user = null;
+        if (principal instanceof OAuth2AuthenticationToken oauthToken) {
+            user = oauthToken.getPrincipal();
+        }
+        return user != null;
+    }
+
 }

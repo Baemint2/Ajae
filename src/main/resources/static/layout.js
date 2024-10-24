@@ -3,15 +3,10 @@ let userInfoFetched = false;
 const layout = {
     init: function () {
         this.setupEvent();
+        loginCheck();
     },
 
     setupEvent: function () {
-        const openAnswer = document.getElementById("openAnswer");
-        openAnswer.addEventListener("click", () => {
-            document.getElementById("answer").style.display = "block";
-            openAnswer.style.display = "none";
-
-        });
 
         document.querySelector(".logo").addEventListener("click", () => location.href = "/");
 
@@ -22,7 +17,7 @@ const layout = {
 
         // 사이드바 열기 함수
         const openSidebar = () => {
-            if(!userInfoFetched) {
+            if (!userInfoFetched) {
                 getUserInfo();
                 userInfoFetched = true;
             }
@@ -58,16 +53,42 @@ const getUserInfo = () => {
         headers: {
             "Content-Type": "application/json"
         }
+    }).then(response => {
+        if (!response.ok) return;
+        else return response.json();
+    })
+    .then(data => {
+        if (!data) return;
+
+        const userWrap = document.querySelector(".user-wrap")
+
+        const img = document.createElement("img");
+        img.src = data.profile;
+        img.alt = "User Profile";
+        img.className = "user-img";
+
+        userWrap.appendChild(img);
+    })
+    .catch(error => {
+
+    })
+}
+
+const loginCheck = () => {
+    const login = document.getElementById("login");
+    const logout = document.getElementById("logout");
+    fetch("/api/v1/loginCheck", {
+        method: "GET",
     }).then(response => response.json())
         .then(data => {
-            const userWrap = document.querySelector(".user-wrap")
-
-            const img = document.createElement("img");
-            img.src = data.profile;
-            img.alt = "User Profile";
-            img.className = "user-img";
-
-            userWrap.appendChild(img);
+            console.log("로그인체크");
+            if(data === true) {
+                login.style.display = "none";
+                logout.style.display = "block";
+            } else {
+                logout.style.display = "none";
+                login.style.display = "block";
+            }
         })
 }
 
