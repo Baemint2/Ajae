@@ -93,7 +93,7 @@ class BookmarkControllerTest {
     @Test
     @WithMockUser
     void checkBookmark() throws Exception {
-        when(bookmarkService.checkBookmark(any(String.class), any(Joke.class))).thenReturn(false);
+        when(bookmarkService.checkBookmark(any(String.class), any(String.class))).thenReturn(false);
         mockMvc.perform(post("/api/v1/check")
                         .contentType(APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(jokeDto)))

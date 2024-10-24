@@ -60,7 +60,7 @@ class BookmarkServiceTest {
     void 북마크_체크_존재() {
         Joke joke = jokeService.findById(143L);
 
-        boolean bookmark = bookmarkService.checkBookmark(kakaoKey, joke);
+        boolean bookmark = bookmarkService.checkBookmark(kakaoKey, joke.getQuestion());
 
         assertTrue(bookmark);
     }
@@ -69,7 +69,7 @@ class BookmarkServiceTest {
     void 북마크_체크_없음() {
         Joke joke = jokeService.findById(1L);
 
-        boolean bookmark = bookmarkService.checkBookmark(kakaoKey, joke);
+        boolean bookmark = bookmarkService.checkBookmark(kakaoKey, joke.getQuestion());
 
         assertFalse(bookmark);
 

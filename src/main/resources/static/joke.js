@@ -3,6 +3,7 @@ const joke = {
         setupJoke();
         bookMark();
         openAnswer();
+        checkBookmark();
     },
 
 }
@@ -38,6 +39,36 @@ const setupJoke = () => {
         document.getElementById("question").textContent = "Q. " + savedJoke.question;
         document.getElementById("answer").textContent = "A. " + savedJoke.answer;
     }
+}
+
+const checkBookmark = () => {
+    const getJoke = JSON.parse(localStorage.getItem("dailyJoke"));
+
+    const body = {
+        question: getJoke.question,
+        answer: getJoke.answer
+    }
+
+    console.log(body)
+    fetch("/api/v1/check", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+    }).then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if(data === true) {
+                const emptyStar = document.querySelector(".empty_star");
+                emptyStar.style.display = "none";
+                const yellowStar = document.createElement("img");
+                yellowStar.src = "/img/yellow_star.png";
+                yellowStar.alt = "노란별";
+                document.querySelector(".bookmark-wrap").appendChild(yellowStar);
+            }
+        })
+
 }
 
 const openAnswer = () => {

@@ -49,8 +49,9 @@ public class BookmarkService {
                 .toList();
     }
 
-    public Boolean checkBookmark(String providerKey, Joke joke) {
+    public Boolean checkBookmark(String providerKey, String question) {
         User user = userService.findByUsername(providerKey);
+        Joke joke = jokeService.findByQuestion(question);
         return bookmarkRepository.checkBookmark(user.getId(), joke.getId());
     }
 }

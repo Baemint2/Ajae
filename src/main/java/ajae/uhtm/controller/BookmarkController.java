@@ -47,7 +47,9 @@ public class BookmarkController {
     public ResponseEntity<?> checkBookmark(@RequestBody JokeDto jokeDto,
                                            Principal principal) {
         String name = principal.getName();
-        Boolean result = bookmarkService.checkBookmark(name, jokeDto.toEntity());
+        String question = jokeDto.toEntity().getQuestion();
+        Boolean result = bookmarkService.checkBookmark(name, question);
+        log.info("result: {}", result);
         return ResponseEntity.ok(result);
     }
 }
