@@ -87,7 +87,7 @@ class JokeControllerWebMvcTest {
                 .answer("소말리아")
                 .build();
         Long jokeId = 1L;
-        when(jokeService.saveJoke(any(JokeDto.class))).thenReturn(jokeId);
+        when(jokeService.saveJoke(any(Joke.class))).thenReturn(jokeId);
         mockMvc.perform(post("/api/v1/joke")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))

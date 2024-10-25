@@ -15,6 +15,11 @@ public class JokeDto {
     private String answer;
     private JokeType jokeType;
 
+    public JokeDto(String question, String answer) {
+        this.question = question;
+        this.answer = answer;
+    }
+
     public JokeDto(String question, String answer, JokeType jokeType) {
         this.question = question;
         this.answer = answer;

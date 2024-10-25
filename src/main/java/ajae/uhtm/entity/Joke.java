@@ -22,11 +22,10 @@ public class Joke extends BaseTimeEntity {
     private boolean called;
 
     @Column(name = "joke_type")
-    @ColumnDefault("'DEFAULT'")
     @Enumerated(EnumType.STRING)
-    private JokeType jokeType;
+    private JokeType jokeType = JokeType.DEFAULT;
 
-    @OneToMany(mappedBy = "joke")
+    @OneToMany(mappedBy = "joke", cascade = CascadeType.ALL)
     private List<Bookmark> jokeList = new ArrayList<>();
 
     public void updateCalled() {

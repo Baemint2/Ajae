@@ -1,6 +1,7 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +14,7 @@ public interface JokeRepository extends JpaRepository<Joke, Long>, QueryJokeRepo
     @Query("update Joke j SET j.called = false")
     void resetCalledStatus(); // 모든 아재개그 called false로 리셋
 
-    List<Joke> findByCalledFalse();
+    List<Joke> findByCalledFalseAndJokeType(JokeType jokeType);
 
     Joke findByIdAndCalledFalse(long id);
 

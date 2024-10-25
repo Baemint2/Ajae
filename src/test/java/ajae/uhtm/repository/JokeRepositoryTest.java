@@ -1,6 +1,7 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -42,13 +43,13 @@ class JokeRepositoryTest {
     void 랜덤인덱스_호출() {
 
         // false 사이즈를 구해서 rand
-        List<Joke> byCalledFalse = jokeRepository.findByCalledFalse();
-
+        List<Joke> byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
+        log.info("byCalledFalse.size() {}", byCalledFalse.size());
         // called 가 전부 true 이면 동작
         if (byCalledFalse.isEmpty()) {
             log.info("called가 전부 true 입니다. 초기화 작업을 진행합니다.");
             jokeRepository.resetCalledStatus();
-            byCalledFalse = jokeRepository.findByCalledFalse();
+            byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
         }
 
         int size = byCalledFalse.size();
@@ -92,7 +93,7 @@ class JokeRepositoryTest {
     @Transactional
     @Commit
     void false_호출() {
-        List<Joke> byCalledFalse = jokeRepository.findByCalledFalse();
+        List<Joke> byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
         System.out.println("byCalledFalse = " + byCalledFalse);
 
         for (int i = 0; i < byCalledFalse.size(); i++) {

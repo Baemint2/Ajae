@@ -32,13 +32,13 @@ public class JokeService {
     @Transactional
     public JokeDto getRandomJoke() {
         // false 사이즈를 구해서 rand
-        List<Joke> byCalledFalse = jokeRepository.findByCalledFalse();
+        List<Joke> byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
 
         // called 가 전부 true 이면 동작
         if (byCalledFalse.isEmpty()) {
             log.info("called가 전부 true 입니다. 초기화 작업을 진행합니다.");
             jokeRepository.resetCalledStatus();
-            byCalledFalse = jokeRepository.findByCalledFalse();
+            byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
         }
 
         int size = byCalledFalse.size();
@@ -55,14 +55,14 @@ public class JokeService {
     }
 
     @Transactional
-    public Long saveJoke(JokeDto jokeDto) {
-        Joke joke = Joke.builder()
-                .question(jokeDto.getQuestion())
-                .answer(jokeDto.getAnswer())
+    public Long saveJoke(Joke joke) {
+        Joke joke2 = Joke.builder()
+                .question(joke.getQuestion())
+                .answer(joke.getAnswer())
                 .jokeType(JokeType.USER_ADDED)
                 .build();
 
-        Joke save = jokeRepository.save(joke);
+        Joke save = jokeRepository.save(joke2);
         long id = save.getId();
         log.info("[saveJoke] : {}", id);
         return id;
