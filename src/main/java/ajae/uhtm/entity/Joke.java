@@ -3,6 +3,7 @@ package ajae.uhtm.entity;
 import ajae.uhtm.dto.JokeDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,11 @@ public class Joke extends BaseTimeEntity {
     private String answer;
     private boolean called;
 
+    @Column(name = "joke_type")
+    @ColumnDefault("'DEFAULT'")
+    @Enumerated(EnumType.STRING)
+    private JokeType jokeType;
+
     @OneToMany(mappedBy = "joke")
     private List<Bookmark> jokeList = new ArrayList<>();
 
@@ -28,18 +34,13 @@ public class Joke extends BaseTimeEntity {
     }
 
     @Builder
-    public Joke(String question, String answer) {
+    public Joke(String question, String answer, JokeType jokeType) {
         this.question = question;
         this.answer = answer;
-    }
-
-    public Joke(String question, String answer, boolean called) {
-        this.question = question;
-        this.answer = answer;
-        this.called = called;
+        this.jokeType = jokeType;
     }
 
     public JokeDto toDto() {
-        return new JokeDto(this.question, this.answer);
+        return new JokeDto(this.question, this.answer, this.jokeType);
     }
 }

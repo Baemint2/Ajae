@@ -18,6 +18,7 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -59,7 +60,11 @@ class JokeControllerWebMvcTest {
     @Test
     void RestDocsTest() throws Exception {
         // given: mock으로 고정된 값을 반환하게 설정
-        JokeDto fixedJoke = new Joke("딸기가 직장을 잃으면?", "딸기 시럽").toDto();
+        JokeDto fixedJoke = Joke.builder()
+                        .question("딸기가 직장을 잃으면?")
+                        .answer("딸기 시럽")
+                        .build().toDto();
+
         when(jokeService.getRandomJoke()).thenReturn(fixedJoke);  // getJoke() 호출 시 고정된 joke 객체를 반환
 
         // when & then
@@ -75,8 +80,12 @@ class JokeControllerWebMvcTest {
     }
 
     @Test
+    @Transactional
     void 개그_등록() throws Exception {
-        JokeDto request = new JokeDto("말과 소가 햄버거 가게를 차리면?", "소말리아");
+        JokeDto request = JokeDto.builder()
+                .question("말과 소가 햄버거 가게를 차리면?")
+                .answer("소말리아")
+                .build();
         Long jokeId = 1L;
         when(jokeService.saveJoke(any(JokeDto.class))).thenReturn(jokeId);
         mockMvc.perform(post("/api/v1/joke")

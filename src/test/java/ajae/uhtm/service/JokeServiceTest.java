@@ -1,6 +1,9 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.dto.JokeDto;
+import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +27,14 @@ class JokeServiceTest {
     }
 
     @Test
+    @Transactional
     void saveJoke() {
-        JokeDto request = new JokeDto("시가 현실적이면?", "시리얼");
-        Long l = jokeService.saveJoke(request);
+        Joke request = Joke.builder()
+                .question("시가 현실적이면?")
+                .answer("시리얼")
+                .build();
+        jokeService.saveJoke(request.toDto());
+        assertThat(request.getJokeType()).isEqualTo(JokeType.DEFAULT);
+
     }
 }

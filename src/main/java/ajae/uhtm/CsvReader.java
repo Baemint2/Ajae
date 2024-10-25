@@ -1,6 +1,7 @@
 package ajae.uhtm;
 
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -24,7 +25,11 @@ public class CsvReader {
                 if (values.length < 2) {
                     continue;
                 }
-                Joke entity = new Joke(values[0], values[1]);
+                Joke entity = Joke.builder()
+                        .question(values[0])
+                        .answer(values[1])
+                        .jokeType(JokeType.DEFAULT)
+                        .build();
                 dataList.add(entity);
             }
         } catch (IOException e) {

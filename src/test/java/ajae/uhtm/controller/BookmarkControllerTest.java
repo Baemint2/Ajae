@@ -85,7 +85,10 @@ class BookmarkControllerTest {
                 .defaultRequest(post("/**").with(csrf()))
                 .build();
 
-        jokeDto = new JokeDto("말과 소가 햄버거 가게를 차리면?", "소말리아");
+        jokeDto = JokeDto.builder()
+                .question("말과 소가 햄버거 가게를 차리면?")
+                .answer("소말리아")
+                .build();
     }
 
     @RegisterExtension
@@ -106,8 +109,11 @@ class BookmarkControllerTest {
     @Test
     @WithMockUser
     void getAllJoke() throws Exception {
-        jokeDto = new JokeDto("말과 소가 햄버거 가게를 차리면?", "소말리아");
-        List<JokeDto> result = List.of(jokeDto, new JokeDto("화를 제일 많이 내는 숫자는?", "8"));
+        jokeDto = JokeDto.builder()
+                .question("말과 소가 햄버거 가게를 차리면?")
+                .answer("소말리아")
+                .build();
+        List<JokeDto> result = List.of(jokeDto);
         when(bookmarkService.getAllJoke(any(String.class))).thenReturn(result);
         mockMvc.perform(get("/api/v1/allJoke")
                 .contentType(APPLICATION_JSON))
