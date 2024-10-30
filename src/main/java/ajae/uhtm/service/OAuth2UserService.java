@@ -1,5 +1,6 @@
 package ajae.uhtm.service;
 
+import ajae.uhtm.config.CustomOAuth2User;
 import ajae.uhtm.entity.ProviderType;
 import ajae.uhtm.entity.Role;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,13 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserService userService;
 
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+
+        log.info("userRequest: {}", userRequest.getAccessToken().getTokenType().toString());
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+        log.info("userRequest: {}", accessToken);
         OAuth2User oAuth2User = super.loadUser(userRequest);
         log.info("oAuth2User: {}", oAuth2User.toString());
 
@@ -42,8 +48,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             case "naver":
                 return naverOauth(oAuth2User, authorities);
             case "kakao":
-                kakaoOauth(oAuth2User);
-                break;
+                return kakaoOauth(oAuth2User, authorities, userNameAttributeName, accessToken); // 수정
             case "google":
                 googleOauth(oAuth2User);
                 break;
@@ -66,9 +71,10 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return new DefaultOAuth2User(authorities, attributes, "id");
     }
 
-    private void kakaoOauth(OAuth2User oAuth2User) {
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-        String providerId = attributes.get("id").toString();
+    private CustomOAuth2User kakaoOauth(OAuth2User oAuth2User, List<GrantedAuthority> authorities, String userNameAttributeName, String accessToken) {
+        Map<String, Object> response = oAuth2User.getAttributes();
+        String providerId = response.get("id").toString();
+
         Map<String, Object> properties = oAuth2User.getAttribute("properties");
         String nickname = (String) properties.get("nickname");
         String profile = (String) properties.get("profile_image");
@@ -76,6 +82,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         Map<String, Object> kakaoAccount = oAuth2User.getAttribute("kakao_account");
         String email = (String) kakaoAccount.get("email");
         userService.saveUserIfNotExist(providerId, email, nickname, profile, ProviderType.KAKAO);
+        return new CustomOAuth2User(authorities, response, userNameAttributeName, accessToken); // 수정
+
     }
 
     private void googleOauth(OAuth2User oAuth2User) {
