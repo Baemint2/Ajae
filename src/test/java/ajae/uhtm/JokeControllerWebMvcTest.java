@@ -1,7 +1,7 @@
 package ajae.uhtm;
 
-import ajae.uhtm.controller.JokeController;
-import ajae.uhtm.dto.JokeDto;
+import ajae.uhtm.controller.joke.JokeController;
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.service.JokeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,12 +16,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -80,14 +81,15 @@ class JokeControllerWebMvcTest {
     }
 
     @Test
-    @Transactional
+    @WithMockUser(username = "testUser")
     void 개그_등록() throws Exception {
+
         JokeDto request = JokeDto.builder()
                 .question("말과 소가 햄버거 가게를 차리면?")
                 .answer("소말리아")
                 .build();
         Long jokeId = 1L;
-        when(jokeService.saveJoke(any(Joke.class))).thenReturn(jokeId);
+        when(jokeService.saveJoke(any(Joke.class), any(String.class))).thenReturn(jokeId);
         mockMvc.perform(post("/api/v1/joke")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))

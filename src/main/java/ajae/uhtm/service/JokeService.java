@@ -1,9 +1,11 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.CsvReader;
-import ajae.uhtm.dto.JokeDto;
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.JokeType;
-import ajae.uhtm.repository.JokeRepository;
+import ajae.uhtm.entity.User;
+import ajae.uhtm.entity.UserJoke;
+import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.entity.Joke;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,10 @@ import java.util.Random;
 public class JokeService {
 
     private final JokeRepository jokeRepository;
+
+    private final UserService userService;
+
+    private final UserJokeService userJokeService;
 
     private final CsvReader csvReader;
 
@@ -55,7 +61,7 @@ public class JokeService {
     }
 
     @Transactional
-    public Long saveJoke(Joke joke) {
+    public Long saveJoke(Joke joke, String username) {
         Joke joke2 = Joke.builder()
                 .question(joke.getQuestion())
                 .answer(joke.getAnswer())
@@ -63,9 +69,15 @@ public class JokeService {
                 .build();
 
         Joke save = jokeRepository.save(joke2);
-        long id = save.getId();
-        log.info("[saveJoke] : {}", id);
-        return id;
+        User byUsername = userService.findByUsername(username);
+
+        UserJoke userJoke = UserJoke.builder()
+                .joke(save)
+                .user(byUsername)
+                .build();
+        userJokeService.saveUserJoke(userJoke);
+
+        return save.getId();
     }
 
     @Transactional

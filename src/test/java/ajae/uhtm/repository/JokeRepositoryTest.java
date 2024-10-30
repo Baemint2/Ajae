@@ -2,6 +2,7 @@ package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
+import ajae.uhtm.repository.joke.JokeRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -130,5 +131,11 @@ class JokeRepositoryTest {
                 jokeRepository.save(joke);
             }
         });
+    }
+
+    @Test
+    void 유저_개그() {
+        List<Joke> byCalledFalseAndJokeType = jokeRepository.findByCalledFalseAndJokeType(JokeType.USER_ADDED);
+        log.info("byCalledFalseAndJokeType = {} ",byCalledFalseAndJokeType);
     }
 }
