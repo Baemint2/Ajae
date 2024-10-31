@@ -11,6 +11,7 @@ public class UserDto {
     private String email;
     private String profile;
     private String nickname;
+    private String password;
     private String providerKey;
     private String accessToken;
 

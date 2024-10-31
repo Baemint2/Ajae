@@ -27,7 +27,7 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
                 .on(user.id.eq(bookmark.user.id))
                 .leftJoin(joke)
                 .on(bookmark.joke.id.eq(joke.id))
-                .where(user.id.eq(3L))
+                .where(user.id.eq(userId))
                 .fetch();
     }
 
