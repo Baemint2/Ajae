@@ -1,6 +1,9 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.*;
+import ajae.uhtm.repository.bookmakrk.BookmarkRepository;
+import ajae.uhtm.repository.joke.JokeRepository;
+import ajae.uhtm.repository.user.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -12,7 +15,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import static ajae.uhtm.entity.QBookmark.bookmark;
 import static ajae.uhtm.entity.QJoke.joke;
 import static ajae.uhtm.entity.QUser.user;
 import static org.junit.jupiter.api.Assertions.*;

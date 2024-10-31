@@ -1,18 +1,13 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.dto.JokeDto;
-import ajae.uhtm.dto.UserDto;
-import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.ProviderType;
 import ajae.uhtm.entity.Role;
 import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.UserRepository;
+import ajae.uhtm.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service

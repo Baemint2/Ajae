@@ -1,10 +1,10 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.dto.JokeDto;
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Bookmark;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.BookmarkRepository;
+import ajae.uhtm.repository.bookmakrk.BookmarkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

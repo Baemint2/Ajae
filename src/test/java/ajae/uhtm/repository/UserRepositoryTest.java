@@ -1,6 +1,7 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.*;
+import ajae.uhtm.repository.user.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;

@@ -1,28 +1,17 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.UserRepository;
+import ajae.uhtm.auth.oauth2.OAuth2UserService;
+import ajae.uhtm.repository.user.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.time.Instant;
-import java.util.Optional;
-
-import static ajae.uhtm.entity.QUser.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @Slf4j
 @SpringBootTest
