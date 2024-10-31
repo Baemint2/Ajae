@@ -1,5 +1,6 @@
 package ajae.uhtm.service;
 
+import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -79,5 +81,17 @@ class JokeServiceTest {
     void getUserJoke() {
         List<Joke> userJoke = jokeRepository.findByCalledFalseAndJokeType(JokeType.USER_ADDED);
         log.info("userJoke: {}", userJoke);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("유저 개그 리스트를 조회한다.")
+    void getAllUserJoke() {
+        List<UserJokeDto> allUserJokes = jokeService.getAllUserJokes();
+
+        for (UserJokeDto allUserJoke: allUserJokes) {
+            log.info("allUserJoke.getJoke: {}", allUserJoke.getJoke());
+            log.info("allUserJoke.getUser: {}", allUserJoke.getUser());
+        };
     }
 }

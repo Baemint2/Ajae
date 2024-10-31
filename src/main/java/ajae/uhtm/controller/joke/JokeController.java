@@ -1,7 +1,9 @@
 package ajae.uhtm.controller.joke;
 
+import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.service.JokeService;
+import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -52,10 +54,11 @@ public class JokeController {
         return "anotherJoke";
     }
 
-//    @GetMapping("/")
-//    public ResponseEntity<List<JokeDto>> getUserJoke() {
-//        jokeService
-//    }
+    @GetMapping("/api/v1/userJoke")
+    public ResponseEntity<List<UserJokeDto>> getAllUserJoke() {
+        List<UserJokeDto> allUserJokes = jokeService.getAllUserJokes();
+        return ResponseEntity.ok(allUserJokes);
+    }
 
 
 }

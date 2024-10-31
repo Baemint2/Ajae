@@ -1,9 +1,8 @@
 package ajae.uhtm.entity;
 
-import ajae.uhtm.dto.JokeDto;
+import ajae.uhtm.dto.joke.JokeDto;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +27,19 @@ public class Joke extends BaseTimeEntity {
     @OneToMany(mappedBy = "joke", cascade = CascadeType.ALL)
     private List<Bookmark> jokeList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "joke")
+    private List<UserJoke> userJokeList = new ArrayList<>();
+
     public void updateCalled() {
         this.called = true;
     }
 
     @Builder
-    public Joke(String question, String answer, JokeType jokeType) {
+    public Joke(String question, String answer, JokeType jokeType, List<UserJoke> userJokeList) {
         this.question = question;
         this.answer = answer;
         this.jokeType = jokeType;
+        this.userJokeList = userJokeList;
     }
 
     public JokeDto toDto() {

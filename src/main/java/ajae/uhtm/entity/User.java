@@ -1,6 +1,6 @@
 package ajae.uhtm.entity;
 
-import ajae.uhtm.dto.UserDto;
+import ajae.uhtm.dto.user.UserDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -41,6 +41,9 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user")
     private List<Bookmark> bookmarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user")
+    private List<UserJoke> userJokes = new ArrayList<>();
 
     public void changeLastLoginDate() {
         this.lastLogin = LocalDateTime.now();

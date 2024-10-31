@@ -1,14 +1,17 @@
 package ajae.uhtm.repository;
 
-import ajae.uhtm.entity.Joke;
-import ajae.uhtm.entity.JokeType;
+import ajae.uhtm.entity.*;
 import ajae.uhtm.repository.joke.JokeRepository;
+import ajae.uhtm.repository.user.UserRepository;
+import ajae.uhtm.repository.userJoke.UserJokeRepository;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Random;
 
+import static ajae.uhtm.entity.QJoke.joke;
+import static ajae.uhtm.entity.QUser.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -33,9 +38,45 @@ class JokeRepositoryTest {
     @Autowired
     EntityManager em;
 
+    @Value("${provider-key.kakao}")
+    String kakaoKey;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserJokeRepository userJokeRepository;
+
+    User testUser;
+
+    Joke testJoke;
+
+    UserJoke testUserJoke;
+
     @BeforeEach
     public void init() {
         queryFactory = new JPAQueryFactory(em);
+
+        testUser = User.builder()
+                .username("testProvider")
+                .username("모지희")
+                .build();
+        
+        testJoke = Joke.builder()
+                .question("개가 한 마리만 사는 나라는?")
+                .answer("독일")
+                .jokeType(JokeType.USER_ADDED)
+                .build();
+
+        User saveUser = userRepository.save(testUser);
+        Joke saveJoke = jokeRepository.save(testJoke);
+
+        testUserJoke = UserJoke.builder()
+                .user(saveUser)
+                .joke(saveJoke)
+                .build();
+
+        userJokeRepository.save(testUserJoke);
+
     }
 
     @Test
@@ -134,8 +175,25 @@ class JokeRepositoryTest {
     }
 
     @Test
+    @Transactional
     void 유저_개그() {
         List<Joke> byCalledFalseAndJokeType = jokeRepository.findByCalledFalseAndJokeType(JokeType.USER_ADDED);
         log.info("byCalledFalseAndJokeType = {} ",byCalledFalseAndJokeType);
+
+        List<UserJoke> userJoke = queryFactory.selectFrom(QUserJoke.userJoke)
+                .where(joke.jokeType.eq(JokeType.USER_ADDED))
+                .fetch();
+
+        assertThat(userJoke).isNotNull();
+        log.info("user: {}", userJoke.get(0).getUser());
+        log.info("joke: {}", userJoke.get(0).getJoke());
+    }
+
+    private BooleanExpression jokeEq(Long jokeId) {
+        return joke.id != null ? joke.id.eq(jokeId) : null;
+    }
+
+    private BooleanExpression userEq(Long userId) {
+        return user.id != null ? user.id.eq(userId) : null;
     }
 }

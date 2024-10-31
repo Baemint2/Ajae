@@ -1,16 +1,17 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.CsvReader;
+import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.entity.UserJoke;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.entity.Joke;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Random;
@@ -69,11 +70,15 @@ public class JokeService {
                 .build();
 
         Joke save = jokeRepository.save(joke2);
-        User byUsername = userService.findByUsername(username);
+        User user = userService.findByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User not found for username: " + username);
+        }
 
         UserJoke userJoke = UserJoke.builder()
                 .joke(save)
-                .user(byUsername)
+                .user(user)
                 .build();
         userJokeService.saveUserJoke(userJoke);
 
@@ -90,4 +95,13 @@ public class JokeService {
         return jokeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 개그입니다."));
     }
+
+    @Transactional
+    public List<UserJokeDto> getAllUserJokes() {
+        List<UserJoke> userJokes = jokeRepository.selectAllUserJoke(JokeType.USER_ADDED);
+        return userJokes.stream()
+                .map(UserJoke::toDto)
+                .toList();
+    }
+
 }
