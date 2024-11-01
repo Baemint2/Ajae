@@ -23,7 +23,13 @@ public class BookmarkService {
     private final UserService userService;
 
     public List<Joke> getBookmarks(Long userId) {
-        return bookmarkRepository.getBookmarks(userId);
+        List<Joke> bookmarks = bookmarkRepository.getBookmarks(userId);
+
+        if(bookmarks == null || bookmarks.isEmpty()) {
+            throw new IllegalArgumentException("북마크가 비어있습니다.");
+        }
+
+        return bookmarks;
     }
 
     @Transactional

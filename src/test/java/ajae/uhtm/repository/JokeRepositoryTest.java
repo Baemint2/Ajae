@@ -107,9 +107,9 @@ class JokeRepositoryTest {
     }
 
     @Test
-    void 특정인덱스_체크_10번() {
+    void 특정인덱스_체크() {
 
-        Joke joke = jokeRepository.findById(10L).get();
+        Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
 
         log.info("문제: {}", joke.getQuestion());
         log.info("정답: {}", joke.getAnswer());
@@ -117,8 +117,8 @@ class JokeRepositoryTest {
         joke.updateCalled();
         jokeRepository.save(joke);
         log.info("isCalled: {}", joke.isCalled());
-        assertThat(joke.getQuestion()).isEqualTo("가장 지루한 중학교?");
-        assertThat(joke.getAnswer()).isEqualTo("로딩중");
+        assertThat(joke.getQuestion()).isEqualTo("개가 한 마리만 사는 나라는?");
+        assertThat(joke.getAnswer()).isEqualTo("독일");
         assertThat(joke.isCalled()).isTrue();
     }
 
@@ -127,7 +127,7 @@ class JokeRepositoryTest {
     @Commit
     void 아재개그상태리셋() {
         jokeRepository.resetCalledStatus();
-        Joke joke = jokeRepository.findById(10L).get();
+        Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
         log.info("상태 확인: {}", joke.isCalled());
     }
 
@@ -149,7 +149,7 @@ class JokeRepositoryTest {
 
     @Test
     void queryDSL테스트() {
-        Joke joke = jokeRepository.selectJokeById(10L);
+        Joke joke = jokeRepository.selectJokeById(testJoke.getId());
         log.info("joke: {}", joke.getId());
         log.info("joke: {}", joke.getQuestion());
         log.info("joke: {}", joke.getAnswer());

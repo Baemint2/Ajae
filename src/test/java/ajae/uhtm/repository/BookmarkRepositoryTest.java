@@ -43,9 +43,36 @@ class BookmarkRepositoryTest {
     @Autowired
     EntityManager em;
 
+    User testUser;
+
+    Joke testJoke;
+
+    Bookmark testBookmark;
+
     @BeforeEach
     public void init() {
         queryFactory = new JPAQueryFactory(em);
+
+        testUser = User.builder()
+                .username("testProvider")
+                .username("모지희")
+                .build();
+
+        testJoke = Joke.builder()
+                .question("개가 한 마리만 사는 나라는?")
+                .answer("독일")
+                .jokeType(JokeType.USER_ADDED)
+                .build();
+
+        User saveUser = userRepository.save(testUser);
+        Joke saveJoke = jokeRepository.save(testJoke);
+
+        testBookmark = Bookmark.builder()
+                .user(saveUser)
+                .joke(saveJoke)
+                .build();
+
+        bookmarkRepository.save(testBookmark);
     }
 
     @Test
@@ -72,7 +99,7 @@ class BookmarkRepositoryTest {
         User user = userRepository.findByProviderKey(userId)
                             .orElseThrow();
 
-        Joke joke = jokeRepository.findById(143L)
+        Joke joke = jokeRepository.findById(testBookmark.getJoke().getId())
                                 .orElseThrow();
 
         Bookmark bookmark = Bookmark.builder()
@@ -88,7 +115,7 @@ class BookmarkRepositoryTest {
         String providerKey = naverKey;
         User user = userRepository.findByProviderKey(providerKey)
                 .orElseThrow(IllegalStateException::new);
-        Joke joke = jokeRepository.findById(72L).orElseThrow();
+        Joke joke = jokeRepository.findById(testBookmark.getJoke().getId()).orElseThrow();
 
         boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
                 .where(jokeEq(joke.getId()),
@@ -103,7 +130,7 @@ class BookmarkRepositoryTest {
         String providerKey = naverKey;
         User user = userRepository.findByProviderKey(providerKey)
                 .orElseThrow(IllegalStateException::new);
-        Joke joke = jokeRepository.findById(152L)
+        Joke joke = jokeRepository.findById(testBookmark.getJoke().getId())
                 .orElseThrow(IllegalStateException::new);
 
         boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)

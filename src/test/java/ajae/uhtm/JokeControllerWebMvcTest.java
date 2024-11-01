@@ -1,9 +1,12 @@
 package ajae.uhtm;
 
+import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.controller.joke.JokeController;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.service.JokeService;
+import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,10 +49,16 @@ class JokeControllerWebMvcTest {
     private ObjectMapper objectMapper;
 
     @MockBean
+    private JwtUtil jwtUtil;
+
+    @MockBean
+    private UserSecurityService userSecurityService;
+
+    @MockBean
     private JokeService jokeService;
 
     @RegisterExtension
-    final RestDocumentationExtension restDocumentation = new RestDocumentationExtension("build/generated-snippets/rest-docs-test-controller-test");
+    final RestDocumentationExtension restDocumentation = new RestDocumentationExtension("build/generated-snippets/joke-controller-test");
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
@@ -87,6 +96,7 @@ class JokeControllerWebMvcTest {
         JokeDto request = JokeDto.builder()
                 .question("말과 소가 햄버거 가게를 차리면?")
                 .answer("소말리아")
+                .jokeType(JokeType.USER_ADDED)
                 .build();
         Long jokeId = 1L;
         when(jokeService.saveJoke(any(Joke.class), any(String.class))).thenReturn(jokeId);
@@ -95,6 +105,13 @@ class JokeControllerWebMvcTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.message").value("문제 등록이 완료되었습니다."))
                 .andDo(print())
-                .andDo(document("jokes/post"));
+                .andDo(document("jokes/post",
+                        requestFields(
+                                fieldWithPath("question").description("문제"),
+                                fieldWithPath("answer").description("정답"),
+                                fieldWithPath("jokeType").description("유저개그")),
+                        responseFields(
+                                fieldWithPath("message").description( "문제 등록이 완료되었습니다.")
+                        )));
     }
 }

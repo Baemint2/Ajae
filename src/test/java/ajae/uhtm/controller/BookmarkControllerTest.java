@@ -1,11 +1,13 @@
 package ajae.uhtm.controller;
 
+import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.config.SecurityConfig;
 import ajae.uhtm.controller.bookmark.BookmarkController;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.service.BookmarkService;
 import ajae.uhtm.auth.oauth2.OAuth2UserService;
 import ajae.uhtm.service.UserService;
+import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -63,6 +66,12 @@ class BookmarkControllerTest {
 
     @InjectMocks
     OAuth2UserService oAuth2UserService;
+
+    @MockBean
+    private JwtUtil jwtUtil;
+
+    @MockBean
+    private UserSecurityService userSecurityService;
 
     @Mock
     private DefaultOAuth2UserService delegate;
