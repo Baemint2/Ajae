@@ -49,6 +49,10 @@ public class User extends BaseTimeEntity {
         this.lastLogin = LocalDateTime.now();
     }
 
+    public void testUserId(Long id) {
+        this.id = id;
+    }
+
     @Builder
     public User(String username, String password, String email, String profile, String nickname, Role role, ProviderType providerType, String providerKey, boolean isDeleted, LocalDateTime lastLogin) {
         this.username = username;

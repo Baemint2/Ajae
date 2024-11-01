@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@ToString(of = {"question", "answer", "called"})
+@ToString(of = {"id", "question", "answer", "called"})
 public class Joke extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,10 @@ public class Joke extends BaseTimeEntity {
 
     public void updateCalled() {
         this.called = true;
+    }
+
+    public void testJokeId(long id) {
+        this.id = id;
     }
 
     @Builder

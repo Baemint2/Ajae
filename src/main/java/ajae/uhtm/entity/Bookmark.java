@@ -26,6 +26,10 @@ public class Bookmark extends BaseTimeEntity{
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
+    public void testBookmarkId(long id) {
+        this.id = id;
+    }
+
     @Builder
     public Bookmark(Joke joke, User user, boolean isDeleted) {
         this.joke = joke;
