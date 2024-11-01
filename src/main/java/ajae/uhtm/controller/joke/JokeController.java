@@ -9,16 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class JokeController {
 
@@ -37,21 +37,6 @@ public class JokeController {
         jokeService.saveJoke(jokeDto.toEntity(), name);
 
         return ResponseEntity.ok(Map.of("message", "문제 등록이 완료되었습니다."));
-    }
-
-    @GetMapping("/joke")
-    public String joke() {
-        return "joke";
-    }
-
-    @GetMapping("/addJoke")
-    public String addJoke() {
-        return "addJoke";
-    }
-
-    @GetMapping("/anotherJoke")
-    public String anotherJoke() {
-        return "anotherJoke";
     }
 
     @GetMapping("/api/v1/userJoke")
