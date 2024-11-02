@@ -1,7 +1,7 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.*;
-import ajae.uhtm.repository.bookmakrk.BookmarkRepository;
+import ajae.uhtm.repository.bookmark.BookmarkRepository;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.user.UserRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;

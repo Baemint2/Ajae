@@ -1,4 +1,4 @@
-package ajae.uhtm.repository.bookmakrk;
+package ajae.uhtm.repository.bookmark;
 
 import ajae.uhtm.entity.Bookmark;
 import org.springframework.data.jpa.repository.JpaRepository;

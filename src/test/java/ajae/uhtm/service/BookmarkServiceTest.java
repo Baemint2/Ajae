@@ -4,7 +4,7 @@ import ajae.uhtm.entity.Bookmark;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.bookmakrk.BookmarkRepository;
+import ajae.uhtm.repository.bookmark.BookmarkRepository;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
