@@ -24,6 +24,10 @@ public class UserJoke extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public void testUserJokeId (long id) {
+        this.id = id;
+    }
+
     @Builder
     public UserJoke(Joke joke, User user) {
         this.joke = joke;

@@ -3,6 +3,7 @@ package ajae.uhtm.controller.joke;
 import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.service.JokeService;
+import ajae.uhtm.service.UserJokeService;
 import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ public class JokeController {
 
     private final JokeService jokeService;
 
+    private final UserJokeService userJokeService;
+
     @GetMapping("/api/v1/joke")
     public ResponseEntity<JokeDto> getJoke(){
         JokeDto joke = jokeService.getRandomJoke();
@@ -41,7 +44,7 @@ public class JokeController {
 
     @GetMapping("/api/v1/userJoke")
     public ResponseEntity<List<UserJokeDto>> getAllUserJoke() {
-        List<UserJokeDto> allUserJokes = jokeService.getAllUserJokes();
+        List<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes();
         return ResponseEntity.ok(allUserJokes);
     }
 

@@ -2,6 +2,7 @@ package ajae.uhtm.dto.joke;
 
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,8 @@ import lombok.NoArgsConstructor;
 public class JokeDto {
     private String question;
     private String answer;
+
+    @JsonIgnore
     private JokeType jokeType;
 
     public JokeDto(String question, String answer) {

@@ -62,7 +62,7 @@ public class JokeService {
     }
 
     @Transactional
-    public Long saveJoke(Joke joke, String username) {
+    public Joke saveJoke(Joke joke, String username) {
         Joke joke2 = Joke.builder()
                 .question(joke.getQuestion())
                 .answer(joke.getAnswer())
@@ -82,7 +82,7 @@ public class JokeService {
                 .build();
         userJokeService.saveUserJoke(userJoke);
 
-        return save.getId();
+        return save;
     }
 
     @Transactional
@@ -94,14 +94,6 @@ public class JokeService {
     public Joke findById (Long id) {
         return jokeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 개그입니다."));
-    }
-
-    @Transactional
-    public List<UserJokeDto> getAllUserJokes() {
-        List<UserJoke> userJokes = jokeRepository.selectAllUserJoke(JokeType.USER_ADDED);
-        return userJokes.stream()
-                .map(UserJoke::toDto)
-                .toList();
     }
 
 }

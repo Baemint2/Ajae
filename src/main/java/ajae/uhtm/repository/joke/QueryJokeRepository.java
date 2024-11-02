@@ -8,7 +8,4 @@ import java.util.List;
 
 public interface QueryJokeRepository {
 
-   Joke selectJokeById(long id);
-
-   List<UserJoke> selectAllUserJoke(JokeType jokeType);
 }
