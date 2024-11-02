@@ -6,6 +6,7 @@ import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.service.JokeService;
+import ajae.uhtm.service.UserJokeService;
 import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,9 @@ class JokeControllerWebMvcTest {
     @MockBean
     private JokeService jokeService;
 
+    @MockBean
+    private UserJokeService userJokeService;
+
     @RegisterExtension
     final RestDocumentationExtension restDocumentation = new RestDocumentationExtension("build/generated-snippets/joke-controller-test");
 
@@ -99,7 +103,7 @@ class JokeControllerWebMvcTest {
                 .jokeType(JokeType.USER_ADDED)
                 .build();
         Long jokeId = 1L;
-        when(jokeService.saveJoke(any(Joke.class), any(String.class))).thenReturn(jokeId);
+        when(jokeService.saveJoke(any(Joke.class), any(String.class))).thenReturn(request.toEntity());
         mockMvc.perform(post("/api/v1/joke")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -108,8 +112,7 @@ class JokeControllerWebMvcTest {
                 .andDo(document("jokes/post",
                         requestFields(
                                 fieldWithPath("question").description("문제"),
-                                fieldWithPath("answer").description("정답"),
-                                fieldWithPath("jokeType").description("유저개그")),
+                                fieldWithPath("answer").description("정답")),
                         responseFields(
                                 fieldWithPath("message").description( "문제 등록이 완료되었습니다.")
                         )));

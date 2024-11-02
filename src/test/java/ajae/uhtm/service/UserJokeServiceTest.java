@@ -1,57 +1,44 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.dto.UserJokeDto;
-import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.entity.UserJoke;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.user.UserRepository;
+import ajae.uhtm.repository.userJoke.UserJokeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
-class JokeServiceTest {
+class UserJokeServiceTest {
 
     @InjectMocks
-    private JokeService jokeService;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
     private UserJokeService userJokeService;
 
     @Mock
-    private JokeRepository jokeRepository;
-
-    @Mock
-    private UserRepository userRepository;
+    private UserJokeRepository userJokeRepository;
 
     User testUser;
-
     Joke testJoke, testJoke2;
 
-    UserJoke testUserJoke, testUserJoke2;
 
+    UserJoke testUserJoke, testUserJoke2;
 
     @BeforeEach
     void init() {
@@ -83,42 +70,49 @@ class JokeServiceTest {
                 .build();
         testUserJoke.testUserJokeId(1L);
 
-        when(jokeRepository.save(testJoke)).thenReturn(testJoke);
-
         testUserJoke2 = UserJoke.builder()
                 .joke(testJoke2)
                 .user(testUser)
                 .build();
         testUserJoke.testUserJokeId(2L);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("유저 개그를 저장한다.")
+    void saveUserJoke() {
+        when(userJokeRepository.save(testUserJoke)).thenReturn(testUserJoke);
+        UserJoke userJoke = userJokeService.saveUserJoke(testUserJoke);
+        assertNotNull(userJoke);
+        assertThat(userJoke.getId()).isEqualTo(testUserJoke.getId());
 
     }
 
     @Test
-    @DisplayName("개그를 한 개 가져온다.")
     @Transactional
-    void getJoke() {
-        when(jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT)).thenReturn(List.of(testJoke, testJoke2));
+    @DisplayName("유저 개그 리스트를 조회한다.")
+    void getAllUserJoke() {
+        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of(testUserJoke,testUserJoke2));
+        List<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes();
 
-        JokeDto joke = jokeService.getRandomJoke();
-        assertThat(joke).isNotNull();
+        assertThat(allUserJokes).isNotEmpty();
+        assertThat(allUserJokes.size()).isEqualTo(2);
 
-        log.info("joke.toString: {}", joke.toString());
+        for (UserJokeDto allUserJoke : allUserJokes) {
+            log.info("allUserJoke.toString: {}", allUserJoke.getJoke());
+        }
     }
 
-    @DisplayName("유저가 개그를 추가한다.")
-    @Transactional
     @Test
-    void saveJoke() {
-        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
-        when(jokeRepository.save(any(Joke.class))).thenAnswer(invocation -> {
-            Joke joke = invocation.getArgument(0);
-            // Simulate an auto-generated ID by setting it after save
-            joke.testJokeId(1L);
-            return joke;
-        });
-        Joke savedJoke = jokeService.saveJoke(testJoke, testUser.getProviderKey());
-        assertThat(savedJoke.getQuestion()).isEqualTo("개가 한 마리만 사는 나라는?");
-        assertThat(savedJoke.getAnswer()).isEqualTo("독일");
-        assertThat(savedJoke.getJokeType()).isEqualTo(JokeType.USER_ADDED);
+    @Transactional
+    @DisplayName("유저 개그가 하나도 없다면 Exception 발생")
+    void getAllUserJokeIsEmpty() {
+        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of());
+
+        assertThrows(IllegalArgumentException.class, () -> userJokeService.getAllUserJokes(),
+                "유저가 추가한 개그가 존재하지 않습니다.");
     }
+
+
+
 }

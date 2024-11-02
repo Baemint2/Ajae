@@ -4,6 +4,7 @@ import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.config.SecurityConfig;
 import ajae.uhtm.controller.bookmark.BookmarkController;
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.entity.Joke;
 import ajae.uhtm.service.BookmarkService;
 import ajae.uhtm.auth.oauth2.OAuth2UserService;
 import ajae.uhtm.service.UserService;
@@ -42,6 +43,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -123,5 +125,23 @@ class BookmarkControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andDo(document("bookmarks/get"));
+    }
+
+    @Test
+    @WithMockUser
+    void addBookmark() throws Exception {
+        jokeDto = JokeDto.builder()
+                .question("말과 소가 햄버거 가게를 차리면?")
+                .answer("소말리아")
+                .build();
+
+        when(bookmarkService.addBookmark(any(Joke.class), any(String.class))).thenReturn( 10L);
+
+        mockMvc.perform(post("/api/v1/bookmark")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(jokeDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("북마크 등록되었습니다."))
+                .andDo(print());
     }
 }

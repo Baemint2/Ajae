@@ -4,16 +4,15 @@ import ajae.uhtm.entity.*;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.user.UserRepository;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Commit;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -27,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.util.Assert.isInstanceOf;
 
 @Slf4j
-@SpringBootTest
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class JokeRepositoryTest {
 
     @Autowired
@@ -38,8 +38,6 @@ class JokeRepositoryTest {
     @Autowired
     EntityManager em;
 
-    @Value("${provider-key.kakao}")
-    String kakaoKey;
     @Autowired
     private UserRepository userRepository;
 
@@ -81,7 +79,6 @@ class JokeRepositoryTest {
 
     @Test
     @Transactional
-    @Commit
     void 랜덤인덱스_호출() {
 
         // false 사이즈를 구해서 rand
@@ -107,6 +104,7 @@ class JokeRepositoryTest {
     }
 
     @Test
+    @Transactional
     void 특정인덱스_체크() {
 
         Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
@@ -115,8 +113,9 @@ class JokeRepositoryTest {
         log.info("정답: {}", joke.getAnswer());
 
         joke.updateCalled();
-        jokeRepository.save(joke);
+        Joke saveJoke = jokeRepository.save(joke);
         log.info("isCalled: {}", joke.isCalled());
+        assertThat(saveJoke.getId()).isEqualTo(testJoke.getId());
         assertThat(joke.getQuestion()).isEqualTo("개가 한 마리만 사는 나라는?");
         assertThat(joke.getAnswer()).isEqualTo("독일");
         assertThat(joke.isCalled()).isTrue();
@@ -124,7 +123,6 @@ class JokeRepositoryTest {
 
     @Test
     @Transactional
-    @Commit
     void 아재개그상태리셋() {
         jokeRepository.resetCalledStatus();
         Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
@@ -133,7 +131,6 @@ class JokeRepositoryTest {
 
     @Test
     @Transactional
-    @Commit
     void false_호출() {
         List<Joke> byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
         System.out.println("byCalledFalse = " + byCalledFalse);
@@ -148,14 +145,7 @@ class JokeRepositoryTest {
     }
 
     @Test
-    void queryDSL테스트() {
-        Joke joke = jokeRepository.selectJokeById(testJoke.getId());
-        log.info("joke: {}", joke.getId());
-        log.info("joke: {}", joke.getQuestion());
-        log.info("joke: {}", joke.getAnswer());
-    }
-
-    @Test
+    @Transactional
     void 문제_중복_검증() {
         String question = "노트북의 반대말은?";
         String answer = "노트남";
@@ -176,24 +166,10 @@ class JokeRepositoryTest {
 
     @Test
     @Transactional
+    @DisplayName("JokeType USER_ADDED 를 조회한다.")
     void 유저_개그() {
         List<Joke> byCalledFalseAndJokeType = jokeRepository.findByCalledFalseAndJokeType(JokeType.USER_ADDED);
         log.info("byCalledFalseAndJokeType = {} ",byCalledFalseAndJokeType);
 
-        List<UserJoke> userJoke = queryFactory.selectFrom(QUserJoke.userJoke)
-                .where(joke.jokeType.eq(JokeType.USER_ADDED))
-                .fetch();
-
-        assertThat(userJoke).isNotNull();
-        log.info("user: {}", userJoke.get(0).getUser());
-        log.info("joke: {}", userJoke.get(0).getJoke());
-    }
-
-    private BooleanExpression jokeEq(Long jokeId) {
-        return joke.id != null ? joke.id.eq(jokeId) : null;
-    }
-
-    private BooleanExpression userEq(Long userId) {
-        return user.id != null ? user.id.eq(userId) : null;
     }
 }
