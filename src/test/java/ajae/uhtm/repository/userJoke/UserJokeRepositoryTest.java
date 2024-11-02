@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static ajae.uhtm.entity.QJoke.joke;
+import static ajae.uhtm.entity.QUser.user;
+import static ajae.uhtm.entity.QUserJoke.userJoke;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -115,6 +117,20 @@ class UserJokeRepositoryTest {
             log.info(userJoke1.getUser().toString());
 
         }
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("특정 유저의 개그를 상세 조회한다.")
+    void getUserJokeDetails() {
+        userJokeRepository.save(testUserJoke);
+        UserJoke userJoke1 = queryFactory.selectFrom(userJoke)
+                .where(joke.id.eq(testJoke.getId()))
+                .where(user.providerKey.eq(testUser.getProviderKey()))
+                .fetchOne();
+
+        assertThat(userJoke1).isNotNull();
+        assertThat(userJoke1.getJoke()).isEqualTo(testJoke);
     }
 
 

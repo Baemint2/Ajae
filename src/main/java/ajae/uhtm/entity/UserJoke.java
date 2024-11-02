@@ -36,7 +36,7 @@ public class UserJoke extends BaseTimeEntity {
 
     public UserJokeDto toDto() {
         return UserJokeDto.builder()
-                .user(user.toDto())
+                .user(user.toInfoDto())
                 .joke(joke.toDto())
                 .build();
     }

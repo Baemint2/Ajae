@@ -33,4 +33,9 @@ public class UserJokeService {
                 .map(UserJoke::toDto)
                 .toList();
     }
+
+    @Transactional
+    public UserJokeDto getUserJokeDetails(long jokeId, String username) {
+        return userJokeRepository.selectUserJoke(jokeId, username).toDto();
+    }
 }

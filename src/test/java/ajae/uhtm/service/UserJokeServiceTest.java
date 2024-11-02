@@ -113,6 +113,14 @@ class UserJokeServiceTest {
                 "유저가 추가한 개그가 존재하지 않습니다.");
     }
 
+    @Test
+    @Transactional
+    @DisplayName("특정 유저의 특정 개그를 상세 조회한다.")
+    void getUserJokeDetails() {
+        when(userJokeRepository.selectUserJoke(testJoke.getId(), testUser.getProviderKey())).thenReturn(testUserJoke);
+        UserJokeDto userJokeDetails = userJokeService.getUserJokeDetails(testJoke.getId(), testUser.getProviderKey());
+        assertNotNull(userJokeDetails);
+    }
 
 
 }
