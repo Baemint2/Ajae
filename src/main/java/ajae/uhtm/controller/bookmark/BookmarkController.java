@@ -50,6 +50,10 @@ public class BookmarkController {
     @PostMapping("/api/v1/check")
     public ResponseEntity<?> checkBookmark(@RequestBody JokeDto jokeDto,
                                            Principal principal) {
+
+        if (principal == null) {
+            return ResponseEntity.ok(false);
+        }
         String name = principal.getName();
         String question = jokeDto.toEntity().getQuestion();
         Boolean result = bookmarkService.checkBookmark(name, question);

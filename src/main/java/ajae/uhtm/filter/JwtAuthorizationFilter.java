@@ -67,8 +67,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             }
         } else {
             log.info("Token is null");
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is null");
-            return;
+            SecurityContextHolder.getContext();
         }
         logRequestExecutionTime(request, chain, response);
     }
@@ -125,6 +124,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.contains("manifest") ||
                 requestURI.contains("/login.js") ||
                 requestURI.startsWith("/oauth2/authorization") ||  // OAuth2 로그인 요청 경로
-                requestURI.startsWith("/login/oauth2/code");
+                requestURI.startsWith("/login/oauth2/code") ||
+                requestURI.startsWith("/api/v1/joke") ||
+                requestURI.startsWith("/api/v1/check") ;
     }
 }
