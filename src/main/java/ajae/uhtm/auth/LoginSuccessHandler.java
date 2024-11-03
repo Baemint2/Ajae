@@ -17,6 +17,7 @@ import java.io.IOException;
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         String accessToken = jwtUtil.createAccessToken(authentication);
@@ -25,8 +26,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         setTokensAndCookies(accessToken, refreshToken, response);
 
         log.info("authentication: {}", authentication.getAuthorities());
-
-        response.sendRedirect("/");
+        response.sendRedirect("http://localhost:3000/index");
     }
 
     private void setTokensAndCookies(String accessToken, String refreshToken, HttpServletResponse response) {

@@ -32,13 +32,18 @@ public class BookmarkController {
             return ResponseEntity.ok(Map.of("message", "북마크 등록되었습니다."));
         }
 
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.badRequest().body(Map.of("message", "북마크 등록에 실패했습니다."));
     }
 
+    // 내 북마크 개그 가져오기
     @GetMapping("/api/v1/allJoke")
-    public ResponseEntity<?> getAllJokes(Principal principal) {
+    public ResponseEntity<?> getBookmarkAllJokes(Principal principal) {
         String name = principal.getName();
         List<JokeDto> allJoke = bookmarkService.getAllJoke(name);
+
+        if (allJoke.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "등록된 북마크가 없습니다."));
+        }
         return ResponseEntity.ok(allJoke);
     }
 

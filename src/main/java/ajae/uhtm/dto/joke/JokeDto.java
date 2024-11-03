@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JokeDto {
+    private long id;
     private String question;
     private String answer;
 
@@ -27,6 +28,12 @@ public class JokeDto {
         this.question = question;
         this.answer = answer;
         this.jokeType = jokeType;
+    }
+
+    public JokeDto(long id, String question, String answer, JokeType jokeType) {
+        this.id = id;
+        this.question = question;
+        this.answer = answer;
     }
 
     public Joke toEntity() {

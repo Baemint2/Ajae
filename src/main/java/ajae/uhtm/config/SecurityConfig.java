@@ -1,9 +1,9 @@
 package ajae.uhtm.config;
 
 import ajae.uhtm.auth.LoginSuccessHandler;
-import ajae.uhtm.filter.JwtAuthorizationFilter;
 import ajae.uhtm.auth.oauth2.CustomOAuth2AccessTokenResponseClient;
 import ajae.uhtm.auth.oauth2.OAuth2UserService;
+import ajae.uhtm.filter.JwtAuthorizationFilter;
 import ajae.uhtm.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +29,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final OAuth2UserService oAuth2UserService;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -36,7 +37,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtAuthorizationFilter jwtAuthorizationFilter, JwtUtil jwtUtil) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtUtil jwtUtil) throws Exception {
         http
             .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)

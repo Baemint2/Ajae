@@ -5,8 +5,7 @@ import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -28,6 +27,7 @@ public class UserController {
     public Boolean loginCheck(Principal principal) {
         String name = principal.getName();
         UserDto user = userService.findByUsername(name).toDto();
+        log.info("loginCheck: {}", user != null);
         return user != null;
     }
 

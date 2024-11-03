@@ -47,6 +47,6 @@ public class Joke extends BaseTimeEntity {
     }
 
     public JokeDto toDto() {
-        return new JokeDto(this.question, this.answer, this.jokeType);
+        return new JokeDto(this.id, this.question, this.answer, this.jokeType);
     }
 }

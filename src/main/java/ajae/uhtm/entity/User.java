@@ -1,6 +1,7 @@
 package ajae.uhtm.entity;
 
 import ajae.uhtm.dto.user.UserDto;
+import ajae.uhtm.dto.user.UserInfoDto;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -73,6 +74,13 @@ public class User extends BaseTimeEntity {
                 .nickname(nickname)
                 .profile(profile)
                 .providerKey(providerKey)
+                .build();
+    }
+
+    public UserInfoDto toInfoDto() {
+        return UserInfoDto.builder()
+                .profile(profile)
+                .nickname(nickname)
                 .build();
     }
 
