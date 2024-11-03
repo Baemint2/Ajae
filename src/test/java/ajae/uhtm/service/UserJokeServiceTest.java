@@ -117,8 +117,8 @@ class UserJokeServiceTest {
     @Transactional
     @DisplayName("특정 유저의 특정 개그를 상세 조회한다.")
     void getUserJokeDetails() {
-        when(userJokeRepository.selectUserJoke(testJoke.getId(), testUser.getProviderKey())).thenReturn(testUserJoke);
-        UserJokeDto userJokeDetails = userJokeService.getUserJokeDetails(testJoke.getId(), testUser.getProviderKey());
+        when(userJokeRepository.selectUserJoke(testJoke.getId(), testUser.getId())).thenReturn(testUserJoke);
+        UserJokeDto userJokeDetails = userJokeService.getUserJokeDetails(String.valueOf(testJoke.getId()), String.valueOf(testUser.getId()));
         assertNotNull(userJokeDetails);
     }
 

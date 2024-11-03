@@ -30,11 +30,11 @@ public class QueryUserJokeRepositoryImpl implements QueryUserJokeRepository {
     }
 
     @Override
-    public UserJoke selectUserJoke(long jokeId, String username) {
+    public UserJoke selectUserJoke(long jokeId, long userId) {
         return queryFactory
                 .selectFrom(userJoke)
                 .where(joke.id.eq(jokeId))
-                .where(user.providerKey.eq(username))
+                .where(user.id.eq(userId))
                 .fetchOne();
     }
 }

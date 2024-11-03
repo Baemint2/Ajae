@@ -1,6 +1,7 @@
 package ajae.uhtm.controller.joke;
 
 import ajae.uhtm.dto.UserJokeDto;
+import ajae.uhtm.dto.UserJokeIdDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
@@ -39,7 +40,7 @@ public class JokeController {
     }
 
     // 유저개그 리스트를 조회한다.
-    @GetMapping("/api/v1/userJoke")
+    @GetMapping("/api/v1/allUserJoke")
     public ResponseEntity<?> getAllUserJoke() {
         List<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes();
 
@@ -50,10 +51,11 @@ public class JokeController {
     }
 
     // 특정 유저 개그 상세 보기
-    @GetMapping("/api/v1/joke/{id}")
-    public ResponseEntity<UserJokeDto> getJokeById(@PathVariable("id") long id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        UserJokeDto userJokeDetails = userJokeService.getUserJokeDetails(id, auth.getName());
+    @PostMapping("/api/v1/userJoke")
+    public ResponseEntity<UserJokeDto> getJokeById(@RequestBody UserJokeIdDto requestDto){
+        log.info("jokeId = {}", requestDto.getJokeId());
+        log.info("userId = {}", requestDto.getUserId());
+        UserJokeDto userJokeDetails = userJokeService.getUserJokeDetails(requestDto.getJokeId(), requestDto.getUserId());
         return ResponseEntity.ok(userJokeDetails);
     }
 

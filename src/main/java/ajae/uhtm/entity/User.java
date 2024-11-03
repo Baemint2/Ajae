@@ -79,6 +79,7 @@ public class User extends BaseTimeEntity {
 
     public UserInfoDto toInfoDto() {
         return UserInfoDto.builder()
+                .id(id)
                 .profile(profile)
                 .nickname(nickname)
                 .build();

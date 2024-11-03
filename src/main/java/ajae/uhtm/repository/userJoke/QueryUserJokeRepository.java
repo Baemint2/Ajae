@@ -10,6 +10,6 @@ public interface QueryUserJokeRepository {
 
     List<UserJoke> selectAllUserJoke(JokeType jokeType);
 
-    UserJoke selectUserJoke(long jokeId, String username);
+    UserJoke selectUserJoke(long jokeId, long userId);
 
 }

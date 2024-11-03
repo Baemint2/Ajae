@@ -35,7 +35,9 @@ public class UserJokeService {
     }
 
     @Transactional
-    public UserJokeDto getUserJokeDetails(long jokeId, String username) {
-        return userJokeRepository.selectUserJoke(jokeId, username).toDto();
+    public UserJokeDto getUserJokeDetails(String jokeId, String userId) {
+        long joke = Long.parseLong(jokeId);
+        long user = Long.parseLong(userId);
+        return userJokeRepository.selectUserJoke(joke, user).toDto();
     }
 }
