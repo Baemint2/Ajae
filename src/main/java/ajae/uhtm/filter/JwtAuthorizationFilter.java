@@ -67,6 +67,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             }
         } else {
             log.info("Token is null");
+            if (!isTokenExcluded(request.getRequestURI())) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is null");
+            }
             SecurityContextHolder.getContext();
         }
         logRequestExecutionTime(request, chain, response);
@@ -127,5 +130,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.startsWith("/login/oauth2/code") ||
                 requestURI.startsWith("/api/v1/joke") ||
                 requestURI.startsWith("/api/v1/check") ;
+    }
+
+    private boolean isTokenExcluded(String requestURI) {
+        return requestURI.equals("/api/v1/loginCheck") ||
+                requestURI.equals("/api/v1/userInfo") ||
+                requestURI.equals("/api/v1/allUserJoke");
     }
 }

@@ -1,47 +1,66 @@
 package ajae.uhtm.controller;
 
+import ajae.uhtm.auth.CustomUserDetails;
 import ajae.uhtm.auth.UserSecurityService;
+import ajae.uhtm.config.SecurityConfig;
 import ajae.uhtm.controller.joke.JokeController;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.entity.UserJoke;
+import ajae.uhtm.filter.JwtAuthorizationFilter;
 import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
 import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.crypto.SecretKey;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import static ajae.uhtm.utils.JwtUtil.EXP_LONG;
+import static ajae.uhtm.utils.JwtUtil.TOKEN_PREFIX;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -67,10 +86,16 @@ class JokeControllerWebMvcTest {
     private JokeService jokeService;
 
     @MockBean
+    private JokeRepository jokeRepository;
+
+    @MockBean
     private UserJokeService userJokeService;
 
     @MockBean
     private UserJokeRepository userJokeRepository;
+
+    @MockBean
+    private SecurityConfig securityConfig;
 
     @RegisterExtension
     final RestDocumentationExtension restDocumentation = new RestDocumentationExtension("build/generated-snippets/joke-controller-test");
@@ -81,10 +106,21 @@ class JokeControllerWebMvcTest {
 
     UserJoke testUserJoke, testUserJoke2;
 
+    private SecretKey key;
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    RequestPostProcessor jwtCookieProcessor;
+
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+                .apply(springSecurity())
+                .addFilters(new JwtAuthorizationFilter(jwtUtil, userSecurityService))
                 .apply(documentationConfiguration(restDocumentation))
+                .defaultRequest(post("/**").with(csrf()))
+                .defaultRequest(delete("/**").with(csrf()))
                 .build();
 
         testUser = User.builder()
@@ -120,9 +156,43 @@ class JokeControllerWebMvcTest {
                 .user(testUser)
                 .build();
         testUserJoke.testUserJokeId(2L);
+
+        doNothing().when(jwtUtil).init();
+
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        when(jwtUtil.getKey()).thenReturn(key);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+
+        List<GrantedAuthority> authorities = Collections.singletonList(authority);
+
+        when(userSecurityService.loadUserByUsername(auth.getName())).thenReturn(new CustomUserDetails(testUser.toDto(), authorities));
+
+        when(jwtUtil.createAccessToken(auth)).thenReturn(Jwts.builder()
+                .issuer("moz1mozi.com")
+                .subject(auth.getName())
+                .expiration(new Date(System.currentTimeMillis() + EXP_LONG))
+                .claim("username", auth.getName())
+                .claim("role", authority)
+                .signWith(key)
+                .compact());
+
+        String jwtToken = jwtUtil.createAccessToken(auth);
+        when(jwtUtil.validateToken(jwtToken)).thenReturn(true);
+        when(jwtUtil.verify(jwtToken)).thenReturn(Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(jwtToken.replace(TOKEN_PREFIX, ""))
+                .getPayload());
+        jwtCookieProcessor = request -> {
+            request.setCookies(new Cookie("accessToken", jwtToken));
+            return request;
+        };
     }
 
     @Test
+    @WithMockUser
     @DisplayName("개그를 하나 조회한다.")
     void getJoke() throws Exception {
         // given: mock으로 고정된 값을 반환하게 설정
@@ -140,17 +210,19 @@ class JokeControllerWebMvcTest {
                 .andDo(print())
                 .andDo(document("jokes/get",
                         responseFields(
+                                fieldWithPath("jokeId").description("개그 ID"),
                                 fieldWithPath("question").description("문제"),
                                 fieldWithPath("answer").description("정답"))
                 ));
     }
 
     @Test
-    @WithMockUser(username = "testUser")
+    @WithMockUser
     @DisplayName("유저가 개그를 등록한다.")
     void saveJoke() throws Exception {
 
         JokeDto request = JokeDto.builder()
+                .id(1)
                 .question("말과 소가 햄버거 가게를 차리면?")
                 .answer("소말리아")
                 .jokeType(JokeType.USER_ADDED)
@@ -159,11 +231,13 @@ class JokeControllerWebMvcTest {
         when(jokeService.saveJoke(any(Joke.class), any(String.class))).thenReturn(request.toEntity());
         mockMvc.perform(post("/api/v1/joke")
                 .contentType(APPLICATION_JSON)
+                .with(jwtCookieProcessor)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(jsonPath("$.message").value("문제 등록이 완료되었습니다."))
                 .andDo(print())
                 .andDo(document("jokes/post",
                         requestFields(
+                                fieldWithPath("jokeId").description("개그번호"),
                                 fieldWithPath("question").description("문제"),
                                 fieldWithPath("answer").description("정답")),
                         responseFields(
@@ -172,27 +246,31 @@ class JokeControllerWebMvcTest {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("유저개그 리스트를 조회한다. (개그와 유저정보) ")
     void getAllUserJokes() throws Exception {
         when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of(testUserJoke, testUserJoke2));
         when(userJokeService.getAllUserJokes()).thenReturn(List.of(testUserJoke.toDto(), testUserJoke2.toDto()));
-        mockMvc.perform(get("/api/v1/userJoke"))
+        mockMvc.perform(get("/api/v1/allUserJoke"))
                 .andDo(print())
                 .andDo(document("userJokes/get",
                         responseFields(
+                                fieldWithPath("[].joke.jokeId").description("개그 ID"),
                                 fieldWithPath("[].joke.question").description("개그 질문"),
                                 fieldWithPath("[].joke.answer").description("개그 답변"),
+                                fieldWithPath("[].user.id").description("유저 ID"),
                                 fieldWithPath("[].user.profile").description("유저 프로필 (null 가능)"),
                                 fieldWithPath("[].user.nickname").description("유저 닉네임")
                         )));
     }
 
     @Test
+    @WithMockUser
     @DisplayName("유저개그 빈 리스트를 조회 한다. (개그와 유저정보) ")
     void getAllUserJokesIsEmpty() throws Exception {
         when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of());
         when(userJokeService.getAllUserJokes()).thenReturn(List.of());
-        mockMvc.perform(get("/api/v1/userJoke"))
+        mockMvc.perform(get("/api/v1/allUserJoke"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("등록된 개그가 없습니다."))
                 .andDo(print());

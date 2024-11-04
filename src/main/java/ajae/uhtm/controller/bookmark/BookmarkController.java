@@ -1,11 +1,15 @@
 package ajae.uhtm.controller.bookmark;
 
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.dto.joke.JokeRequestDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -59,5 +63,21 @@ public class BookmarkController {
         Boolean result = bookmarkService.checkBookmark(name, question);
         log.info("result: {}", result);
         return ResponseEntity.ok(result);
+    }
+
+    // 북마크 제거
+    @DeleteMapping("/api/v1/bookmark")
+    public ResponseEntity<?> deleteBookmark(Principal principal,
+                                            @RequestBody JokeDto requestDto) {
+        log.info("Deleting bookmark for user: {}", principal.getName()); // 추가된 로그
+        String name = principal.getName();
+        int result = bookmarkService.deleteBookmark(name, requestDto.getId());
+        log.info("Delete result: {}", result); // 삭제 결과 로그
+
+        if(result > 0) {
+            log.info("result: {}", result);
+            return ResponseEntity.ok(Map.of("message", "북마크가 제거되었습니다."));
+        }
+        return ResponseEntity.badRequest().body(Map.of("message", "북마크가 제거에 실패했습니다."));
     }
 }

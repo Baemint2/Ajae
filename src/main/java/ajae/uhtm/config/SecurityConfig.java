@@ -1,6 +1,8 @@
 package ajae.uhtm.config;
 
+import ajae.uhtm.auth.CustomAuthenticationEntryPoint;
 import ajae.uhtm.auth.LoginSuccessHandler;
+import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.auth.oauth2.CustomOAuth2AccessTokenResponseClient;
 import ajae.uhtm.auth.oauth2.OAuth2UserService;
 import ajae.uhtm.filter.JwtAuthorizationFilter;
@@ -29,7 +31,7 @@ public class SecurityConfig {
 
     private final AuthenticationConfiguration authenticationConfiguration;
     private final OAuth2UserService oAuth2UserService;
-    private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -37,12 +39,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtUtil jwtUtil) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtUtil jwtUtil, UserSecurityService userSecurityService) throws Exception {
         http
             .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .headers(headersConfigurer -> headersConfigurer.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .authorizeHttpRequests(request -> request
+                    .requestMatchers("/api/v1/bookmark").authenticated()
                             .anyRequest().permitAll())
             .oauth2Login(oauth2 -> oauth2
                             .loginPage("/login")
@@ -53,7 +56,9 @@ public class SecurityConfig {
                     .successHandler(new LoginSuccessHandler(jwtUtil))
             )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
+                .addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userSecurityService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

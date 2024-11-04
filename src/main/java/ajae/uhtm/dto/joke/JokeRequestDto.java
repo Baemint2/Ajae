@@ -1,32 +1,33 @@
 package ajae.uhtm.dto.joke;
 
+
 import ajae.uhtm.entity.Joke;
-import ajae.uhtm.entity.JokeType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class JokeDto {
+@AllArgsConstructor
+public class JokeRequestDto {
 
-    @JsonProperty(value = "jokeId")
+    @JsonProperty("jokeId")
     private long id;
     private String question;
     private String answer;
 
-    @JsonIgnore
-    private JokeType jokeType;
+    public JokeRequestDto() {
+    }
 
-    public JokeDto(long id, String question, String answer, JokeType jokeType) {
+    @JsonCreator
+    public JokeRequestDto(Long id,
+                          String question,
+                          String answer) {
         this.id = id;
         this.question = question;
         this.answer = answer;
-        this.jokeType = jokeType;
     }
 
     public Joke toEntity() {
@@ -38,8 +39,9 @@ public class JokeDto {
 
     @Override
     public String toString() {
-        return "JokeDto{" +
-                "question='" + question + '\'' +
+        return "JokeRequestDto{" +
+                "jokeId='" + id + '\'' +
+                ", question='" + question + '\'' +
                 ", answer='" + answer + '\'' +
                 '}';
     }

@@ -10,6 +10,7 @@ import ajae.uhtm.repository.user.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,8 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @SpringBootTest
@@ -58,7 +58,7 @@ class BookmarkServiceTest {
 
     Joke testJoke, testJoke2;
 
-    Bookmark testBookmark;
+    Bookmark testBookmark, testBookmark2;
 
     @BeforeEach
     void init() {
@@ -82,18 +82,20 @@ class BookmarkServiceTest {
                 .build();
 
         testJoke.testJokeId(99999L);
-        testJoke.testJokeId(99998L);
-
-        userRepository.save(testUser);
-        jokeRepository.save(testJoke);
+        testJoke2.testJokeId(99998L);
 
         testBookmark = Bookmark.builder()
                 .user(testUser)
                 .joke(testJoke)
                 .build();
 
-        testBookmark.testBookmarkId(99999L);
-        bookmarkRepository.save(testBookmark);
+        testBookmark2 = Bookmark.builder()
+                .user(testUser)
+                .joke(testJoke2)
+                .build();
+
+        testBookmark.testBookmarkId(1L);
+        testBookmark2.testBookmarkId(2L);
 
         when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
         when(jokeService.findByQuestion(anyString())).thenReturn(testJoke);
@@ -140,6 +142,28 @@ class BookmarkServiceTest {
         boolean bookmark = bookmarkService.checkBookmark(testUser.getProviderKey(), testJoke.getQuestion());
 
         assertFalse(bookmark);
+
+    }
+
+    @Test
+    @DisplayName("특정 북마크를 제거한다.")
+    void deleteBookmark() {
+        // 북마크 2개를 저장후, 사이즈 2 리스트를 반환한다.
+        when(bookmarkRepository.getBookmarks(testUser.getId())).thenReturn(List.of(testJoke, testJoke2));
+
+        when(bookmarkService.deleteBookmark(testUser.getProviderKey(), testJoke.getId())).thenReturn(1);
+
+        // 북마크를 조회하여 사이즈가 2인지 조회, 이후 testJoke 삭제
+        List<Joke> bookmarks = bookmarkService.getBookmarks(testUser.getId());
+        assertThat(bookmarks.size()).isEqualTo(2);
+
+        int i = bookmarkService.deleteBookmark(testUser.getProviderKey(), testJoke.getId());
+        System.out.println("i = " + i);
+
+        // testJoke를 삭제 후에 testJoke2만 남은 리스트 객체 생성 후 사이즈 체크
+        when(bookmarkRepository.getBookmarks(testUser.getId())).thenReturn(List.of(testJoke2));
+        bookmarks = bookmarkService.getBookmarks(testUser.getId());
+        assertThat(bookmarks.size()).isEqualTo(1);
 
     }
 

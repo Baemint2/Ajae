@@ -5,10 +5,10 @@ import ajae.uhtm.entity.Bookmark;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.repository.bookmark.BookmarkRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -22,6 +22,7 @@ public class BookmarkService {
     private final JokeService jokeService;
     private final UserService userService;
 
+    @Transactional(readOnly = true)
     public List<Joke> getBookmarks(Long userId) {
         List<Joke> bookmarks = bookmarkRepository.getBookmarks(userId);
 
@@ -54,10 +55,17 @@ public class BookmarkService {
                 .map(Joke::toDto)
                 .toList();
     }
-
+    @Transactional
     public Boolean checkBookmark(String providerKey, String question) {
         User user = userService.findByUsername(providerKey);
         Joke joke = jokeService.findByQuestion(question);
         return bookmarkRepository.checkBookmark(user.getId(), joke.getId());
+    }
+
+    @Transactional
+    public int deleteBookmark(String providerKey, long jokeId) {
+        User user = userService.findByUsername(providerKey);
+        long bookmark = bookmarkRepository.getBookmark(user.getId(), jokeId);
+        return bookmarkRepository.deleteBookmarkById(bookmark);
     }
 }

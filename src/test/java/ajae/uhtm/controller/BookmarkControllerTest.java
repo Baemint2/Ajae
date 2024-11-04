@@ -1,15 +1,25 @@
 package ajae.uhtm.controller;
 
+import ajae.uhtm.auth.CustomUserDetails;
 import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.config.SecurityConfig;
 import ajae.uhtm.controller.bookmark.BookmarkController;
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.entity.Bookmark;
 import ajae.uhtm.entity.Joke;
+import ajae.uhtm.entity.JokeType;
+import ajae.uhtm.entity.User;
+import ajae.uhtm.filter.JwtAuthorizationFilter;
+import ajae.uhtm.repository.bookmark.BookmarkRepository;
 import ajae.uhtm.service.BookmarkService;
 import ajae.uhtm.auth.oauth2.OAuth2UserService;
 import ajae.uhtm.service.UserService;
 import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,31 +28,40 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.List;
+import javax.crypto.SecretKey;
+import java.util.*;
 
+import static ajae.uhtm.utils.JwtUtil.EXP_LONG;
+import static ajae.uhtm.utils.JwtUtil.TOKEN_PREFIX;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -63,6 +82,12 @@ class BookmarkControllerTest {
     @MockBean
     private BookmarkService bookmarkService;
 
+    @Mock
+    private BookmarkRepository bookmarkRepository;
+
+    @MockBean
+    private JwtAuthorizationFilter jwtFilter;
+
     @MockBean
     private SecurityConfig securityConfig;
 
@@ -78,22 +103,99 @@ class BookmarkControllerTest {
     @Mock
     private DefaultOAuth2UserService delegate;
 
-    OAuth2User oAuth2User;
 
     JokeDto jokeDto, jokeDto2;
+
+    User testUser;
+
+    Joke testJoke, testJoke2;
+
+    Bookmark testBookmark, testBookmark2;
+
+    private SecretKey key;
+
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    RequestPostProcessor jwtCookieProcessor;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(documentationConfiguration(restDocumentation))
                 .apply(springSecurity())
+                .addFilters(new JwtAuthorizationFilter(jwtUtil, userSecurityService))
                 .defaultRequest(post("/**").with(csrf()))
+                .defaultRequest(delete("/**").with(csrf()))
+                .build();
+        testUser = User.builder()
+                .providerKey("testProvider")
+                .nickname("모지희")
                 .build();
 
-        jokeDto = JokeDto.builder()
-                .question("말과 소가 햄버거 가게를 차리면?")
-                .answer("소말리아")
+        testUser.testUserId(99999L);
+
+        testJoke = Joke.builder()
+                .question("개가 한 마리만 사는 나라는?")
+                .answer("독일")
+                .jokeType(JokeType.USER_ADDED)
                 .build();
+
+        testJoke2 = Joke.builder()
+                .question("테스트 문제")
+                .answer("테스트 정답")
+                .jokeType(JokeType.USER_ADDED)
+                .build();
+
+        testJoke.testJokeId(1L);
+        testJoke2.testJokeId(2L);
+
+        testBookmark = Bookmark.builder()
+                .user(testUser)
+                .joke(testJoke)
+                .build();
+
+        testBookmark2 = Bookmark.builder()
+                .user(testUser)
+                .joke(testJoke2)
+                .build();
+
+        testBookmark.testBookmarkId(99998L);
+        testBookmark2.testBookmarkId(99999L);
+
+        doNothing().when(jwtUtil).init();
+
+        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        when(jwtUtil.getKey()).thenReturn(key);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+
+        List<GrantedAuthority> authorities = Collections.singletonList(authority);
+
+        when(userSecurityService.loadUserByUsername(auth.getName())).thenReturn(new CustomUserDetails(testUser.toDto(), authorities));
+
+        when(jwtUtil.createAccessToken(auth)).thenReturn(Jwts.builder()
+                .issuer("moz1mozi.com")
+                .subject(auth.getName())
+                .expiration(new Date(System.currentTimeMillis() + EXP_LONG))
+                .claim("username", auth.getName())
+                .claim("role", authority)
+                .signWith(key)
+                .compact());
+
+        String jwtToken = jwtUtil.createAccessToken(auth);
+        when(jwtUtil.validateToken(jwtToken)).thenReturn(true);
+        when(jwtUtil.verify(jwtToken)).thenReturn(Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(jwtToken.replace(TOKEN_PREFIX, ""))
+                .getPayload());
+        jwtCookieProcessor = request -> {
+            request.setCookies(new Cookie("accessToken", jwtToken));
+            return request;
+        };
+
     }
 
     @RegisterExtension
@@ -103,10 +205,12 @@ class BookmarkControllerTest {
     @WithMockUser
     @DisplayName("특정 유저가 특정 개그를 북마크등록 했는지 체크한다.")
     void checkBookmark() throws Exception {
+
         when(bookmarkService.checkBookmark(any(String.class), any(String.class))).thenReturn(true);
         mockMvc.perform(post("/api/v1/check")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jokeDto)))
+                        .with(jwtCookieProcessor)
+                        .content(objectMapper.writeValueAsString(testJoke.toDto())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"))
                 .andDo(print());
@@ -119,7 +223,8 @@ class BookmarkControllerTest {
         when(bookmarkService.checkBookmark(any(String.class), any(String.class))).thenReturn(false);
         mockMvc.perform(post("/api/v1/check")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jokeDto)))
+                        .with(jwtCookieProcessor)
+                        .content(objectMapper.writeValueAsString(testJoke.toDto())))
                 .andExpect(status().isOk())
                 .andExpect(content().string("false"))
                 .andDo(print())
@@ -130,20 +235,12 @@ class BookmarkControllerTest {
     @WithMockUser
     @DisplayName("특정 유저가 북마크에 등록한 개그를 리스트로 조회한다.")
     void getAllJoke() throws Exception {
-        jokeDto = JokeDto.builder()
-                .question("말과 소가 햄버거 가게를 차리면?")
-                .answer("소말리아")
-                .build();
 
-        jokeDto2 = JokeDto.builder()
-                .question("아몬드가 죽으면?")
-                .answer("다이아몬드")
-                .build();
-
-        List<JokeDto> result = List.of(jokeDto, jokeDto2);
+        List<JokeDto> result = List.of(testJoke.toDto(), testJoke2.toDto());
         when(bookmarkService.getAllJoke(any(String.class))).thenReturn(result);
         mockMvc.perform(get("/api/v1/allJoke")
-                .contentType(APPLICATION_JSON))
+                        .with(jwtCookieProcessor)
+                        .contentType(APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andDo(document("bookmarks/get"));
@@ -157,6 +254,7 @@ class BookmarkControllerTest {
         List<JokeDto> result = List.of();
         when(bookmarkService.getAllJoke(any(String.class))).thenReturn(result);
         mockMvc.perform(get("/api/v1/allJoke")
+                        .with(jwtCookieProcessor)
                         .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value( "등록된 북마크가 없습니다."))
@@ -167,37 +265,50 @@ class BookmarkControllerTest {
     @WithMockUser
     @DisplayName("특정 유저가 특정 개그를 북마크에 등록한다.")
     void addBookmark() throws Exception {
-        jokeDto = JokeDto.builder()
-                .question("말과 소가 햄버거 가게를 차리면?")
-                .answer("소말리아")
-                .build();
-
         when(bookmarkService.addBookmark(any(Joke.class), any(String.class))).thenReturn( 10L);
 
         mockMvc.perform(post("/api/v1/bookmark")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jokeDto)))
+                        .with(jwtCookieProcessor)
+                        .with(user("testUser").roles("USER"))
+                        .content(objectMapper.writeValueAsString(testJoke.toDto())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("북마크 등록되었습니다."))
                 .andDo(print());
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser()
     @DisplayName("특정 유저가 특정 개그를 북마크에 등록 실패한다.")
     void addBookmark_fail() throws Exception {
-        jokeDto = JokeDto.builder()
-                .question("말과 소가 햄버거 가게를 차리면?")
-                .answer("소말리아")
-                .build();
-
         when(bookmarkService.addBookmark(any(Joke.class), any(String.class))).thenReturn( 0L);
-
         mockMvc.perform(post("/api/v1/bookmark")
                         .contentType(APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(jokeDto)))
+                        .with(jwtCookieProcessor)
+                        .with(user("testUser").roles("USER"))
+                        .content(objectMapper.writeValueAsString(testJoke.toDto())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("북마크 등록에 실패했습니다."))
                 .andDo(print());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("특정 유저의 특정 북마크를 제거한다.")
+    void deleteBookmark() throws Exception {
+
+        when(bookmarkService.getBookmarks(testUser.getId())).thenReturn(List.of(testJoke, testJoke2));
+        when(bookmarkService.deleteBookmark(any(String.class), any(Long.class))).thenReturn(1);
+
+        String requestBody = objectMapper.writeValueAsString(testJoke.toDto());
+
+        mockMvc.perform(delete("/api/v1/bookmark")
+                    .contentType(APPLICATION_JSON)
+                    .with(jwtCookieProcessor)
+                    .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("북마크가 제거되었습니다."))
+                .andDo(print());
+
     }
 }

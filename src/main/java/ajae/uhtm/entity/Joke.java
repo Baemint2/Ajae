@@ -1,6 +1,7 @@
 package ajae.uhtm.entity;
 
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.dto.joke.JokeRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,5 +49,9 @@ public class Joke extends BaseTimeEntity {
 
     public JokeDto toDto() {
         return new JokeDto(this.id, this.question, this.answer, this.jokeType);
+    }
+
+    public JokeRequestDto toRequestDto() {
+        return new JokeRequestDto(this.id, this.question, this.answer);
     }
 }

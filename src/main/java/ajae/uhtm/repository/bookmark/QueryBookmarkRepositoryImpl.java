@@ -28,6 +28,7 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
                 .leftJoin(joke)
                 .on(bookmark.joke.id.eq(joke.id))
                 .where(user.id.eq(userId))
+                .where(bookmark.isDeleted.eq(false))
                 .fetch();
     }
 
@@ -37,6 +38,15 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
                 .where(jokeEq(jokeId),
                         userEq(userId))
                 .fetchOne() != null;
+    }
+
+    @Override
+    public long getBookmark(Long userId, Long jokeId) {
+        return queryFactory.select(bookmark.id)
+                .from(bookmark)
+                .where(jokeEq(jokeId),
+                        userEq(userId))
+                .fetchOne();
     }
 
     private BooleanExpression jokeEq(Long jokeId) {
