@@ -14,6 +14,7 @@ import ajae.uhtm.repository.joke.JokeRepository;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
+import ajae.uhtm.service.UserService;
 import ajae.uhtm.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -90,6 +91,9 @@ class JokeControllerWebMvcTest {
 
     @MockBean
     private UserJokeService userJokeService;
+
+    @MockBean
+    private UserService userService;
 
     @MockBean
     private UserJokeRepository userJokeRepository;
@@ -273,6 +277,18 @@ class JokeControllerWebMvcTest {
         mockMvc.perform(get("/api/v1/allUserJoke"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("등록된 개그가 없습니다."))
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("특정 유저의 유저개그 리스트를 조회한다. ")
+    void getUserJokes() throws Exception {
+        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
+        when(userJokeService.findAllJokesByUserId(testUser.getId())).thenReturn(List.of(testJoke.toDto(), testJoke2.toDto()));
+        mockMvc.perform(get("/api/v1/userJoke")
+                        .with(jwtCookieProcessor))
+                .andExpect(status().isOk())
                 .andDo(print());
     }
 }

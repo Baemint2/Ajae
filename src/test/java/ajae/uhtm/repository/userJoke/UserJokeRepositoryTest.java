@@ -133,5 +133,20 @@ class UserJokeRepositoryTest {
         assertThat(userJoke1.getJoke()).isEqualTo(testJoke);
     }
 
+    @Test
+    @Transactional
+    @DisplayName("특정 유저의 유저 개그 리스트를 조회한다.")
+    void getUserJokeById() {
+        userJokeRepository.save(testUserJoke);
+        userJokeRepository.save(testUserJoke2);
+        List<UserJoke> userJokeList = queryFactory.selectFrom(userJoke)
+                .where(user.id.eq(testUser.getId()))
+                .fetch();
+
+        for (UserJoke userJoke1 : userJokeList) {
+            System.out.println("userJoke1 = " + userJoke1.toDto().getJoke());
+        }
+    }
+
 
 }

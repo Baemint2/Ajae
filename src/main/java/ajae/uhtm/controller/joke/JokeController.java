@@ -3,8 +3,10 @@ package ajae.uhtm.controller.joke;
 import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.UserJokeIdDto;
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.entity.User;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
+import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +26,8 @@ public class JokeController {
     private final JokeService jokeService;
 
     private final UserJokeService userJokeService;
+
+    private final UserService userService;
 
     @GetMapping("/api/v1/joke")
     public ResponseEntity<JokeDto> getJoke(){
@@ -59,5 +64,13 @@ public class JokeController {
         return ResponseEntity.ok(userJokeDetails);
     }
 
+    // 특정 유저가 추가한 개그 리스트
+    @GetMapping("/api/v1/userJoke")
+    public ResponseEntity<List<JokeDto>> getUserJokes(Principal principal){
+        User user = userService.findByUsername(principal.getName());
+        List<JokeDto> jokesByUserId = userJokeService.findAllJokesByUserId(user.getId());
+
+        return ResponseEntity.ok(jokesByUserId);
+    }
 
 }

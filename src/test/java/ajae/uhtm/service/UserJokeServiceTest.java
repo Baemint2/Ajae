@@ -1,12 +1,11 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.dto.UserJokeDto;
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.entity.UserJoke;
-import ajae.uhtm.repository.joke.JokeRepository;
-import ajae.uhtm.repository.user.UserRepository;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -122,5 +120,16 @@ class UserJokeServiceTest {
         assertNotNull(userJokeDetails);
     }
 
+    @Test
+    @Transactional
+    @DisplayName("특정 유저의 유저 개그 리스트를 조회한다.")
+    void getUserJokeById() {
+    when(userJokeRepository.selectUserJokeById(testUser.getId())).thenReturn(List.of(testUserJoke, testUserJoke2));
+        List<JokeDto> userJokeById = userJokeService.findAllJokesByUserId(testUser.getId());
+        for (JokeDto userJokeDto : userJokeById) {
+            System.out.println("userJokeDto = " + userJokeDto);
+        }
+
+    }
 
 }

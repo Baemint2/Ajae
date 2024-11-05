@@ -1,6 +1,7 @@
 package ajae.uhtm.service;
 
 import ajae.uhtm.dto.UserJokeDto;
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.UserJoke;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
@@ -39,5 +40,14 @@ public class UserJokeService {
         long joke = Long.parseLong(jokeId);
         long user = Long.parseLong(userId);
         return userJokeRepository.selectUserJoke(joke, user).toDto();
+    }
+
+    @Transactional
+    public List<JokeDto> findAllJokesByUserId(long userId) {
+        List<UserJoke> userJokes = userJokeRepository.selectUserJokeById(userId);
+        return userJokes.stream()
+                .map(UserJoke::toDto)
+                .map(UserJokeDto::getJoke)
+                .toList();
     }
 }

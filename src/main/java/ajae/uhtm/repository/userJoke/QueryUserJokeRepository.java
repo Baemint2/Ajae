@@ -12,4 +12,6 @@ public interface QueryUserJokeRepository {
 
     UserJoke selectUserJoke(long jokeId, long userId);
 
+    List<UserJoke> selectUserJokeById(long userId);
+
 }
