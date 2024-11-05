@@ -297,7 +297,7 @@ class BookmarkControllerTest {
     @DisplayName("특정 유저의 특정 북마크를 제거한다.")
     void deleteBookmark() throws Exception {
 
-        when(bookmarkService.getBookmarks(testUser.getId())).thenReturn(List.of(testJoke, testJoke2));
+        when(bookmarkService.getAllJoke(testUser.getProviderKey())).thenReturn(List.of(testJoke.toDto(), testJoke2.toDto()));
         when(bookmarkService.deleteBookmark(any(String.class), any(Long.class))).thenReturn(1);
 
         String requestBody = objectMapper.writeValueAsString(testJoke.toDto());

@@ -22,17 +22,6 @@ public class BookmarkService {
     private final JokeService jokeService;
     private final UserService userService;
 
-    @Transactional(readOnly = true)
-    public List<Joke> getBookmarks(Long userId) {
-        List<Joke> bookmarks = bookmarkRepository.getBookmarks(userId);
-
-        if(bookmarks == null || bookmarks.isEmpty()) {
-            throw new IllegalArgumentException("북마크가 비어있습니다.");
-        }
-
-        return bookmarks;
-    }
-
     @Transactional
     public long addBookmark(Joke joke, String providerKey) {
 
@@ -49,7 +38,11 @@ public class BookmarkService {
 
     public List<JokeDto> getAllJoke(String name) {
         User user = userService.findByUsername(name);
-        List<Joke> bookmarks = getBookmarks(user.getId());
+        List<Joke> bookmarks = bookmarkRepository.getBookmarks(user.getId());
+
+        if(bookmarks == null || bookmarks.isEmpty()) {
+            throw new IllegalArgumentException("북마크가 비어있습니다.");
+        }
 
         return bookmarks.stream()
                 .map(Joke::toDto)

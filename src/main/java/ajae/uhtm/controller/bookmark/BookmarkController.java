@@ -45,9 +45,7 @@ public class BookmarkController {
         String name = principal.getName();
         List<JokeDto> allJoke = bookmarkService.getAllJoke(name);
 
-        if (allJoke.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("message", "등록된 북마크가 없습니다."));
-        }
+
         return ResponseEntity.ok(allJoke);
     }
 

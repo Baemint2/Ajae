@@ -1,5 +1,6 @@
 package ajae.uhtm.service;
 
+import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Bookmark;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
@@ -104,7 +105,7 @@ class BookmarkServiceTest {
     @Test
     void 북마크_호출() {
         when(bookmarkRepository.getBookmarks(anyLong())).thenReturn(List.of(testJoke, testJoke2));
-        List<Joke> bookmarks = bookmarkService.getBookmarks(testBookmark.getUser().getId());
+        List<JokeDto> bookmarks = bookmarkService.getAllJoke(testBookmark.getUser().getProviderKey());
         assertThat(bookmarks).isNotNull();
         System.out.println("bookmarks: " + bookmarks);
     }
@@ -113,7 +114,7 @@ class BookmarkServiceTest {
     void 북마크_비어있음() {
         when(bookmarkRepository.getBookmarks(anyLong())).thenReturn(Collections.emptyList());
 
-        assertThatThrownBy(() -> bookmarkService.getBookmarks(testBookmark.getUser().getId()))
+        assertThatThrownBy(() -> bookmarkService.getAllJoke(testBookmark.getUser().getProviderKey()))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -154,7 +155,7 @@ class BookmarkServiceTest {
         when(bookmarkService.deleteBookmark(testUser.getProviderKey(), testJoke.getId())).thenReturn(1);
 
         // 북마크를 조회하여 사이즈가 2인지 조회, 이후 testJoke 삭제
-        List<Joke> bookmarks = bookmarkService.getBookmarks(testUser.getId());
+        List<JokeDto> bookmarks = bookmarkService.getAllJoke(testUser.getProviderKey());
         assertThat(bookmarks.size()).isEqualTo(2);
 
         int i = bookmarkService.deleteBookmark(testUser.getProviderKey(), testJoke.getId());
@@ -162,7 +163,7 @@ class BookmarkServiceTest {
 
         // testJoke를 삭제 후에 testJoke2만 남은 리스트 객체 생성 후 사이즈 체크
         when(bookmarkRepository.getBookmarks(testUser.getId())).thenReturn(List.of(testJoke2));
-        bookmarks = bookmarkService.getBookmarks(testUser.getId());
+        bookmarks = bookmarkService.getAllJoke(testUser.getProviderKey());
         assertThat(bookmarks.size()).isEqualTo(1);
 
     }
