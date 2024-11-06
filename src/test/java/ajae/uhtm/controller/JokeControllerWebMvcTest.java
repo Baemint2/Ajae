@@ -4,6 +4,7 @@ import ajae.uhtm.auth.CustomUserDetails;
 import ajae.uhtm.auth.UserSecurityService;
 import ajae.uhtm.config.SecurityConfig;
 import ajae.uhtm.controller.joke.JokeController;
+import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
@@ -31,6 +32,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
@@ -49,6 +54,7 @@ import javax.crypto.SecretKey;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ajae.uhtm.utils.JwtUtil.EXP_LONG;
 import static ajae.uhtm.utils.JwtUtil.TOKEN_PREFIX;
@@ -253,18 +259,46 @@ class JokeControllerWebMvcTest {
     @WithMockUser
     @DisplayName("유저개그 리스트를 조회한다. (개그와 유저정보) ")
     void getAllUserJokes() throws Exception {
-        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of(testUserJoke, testUserJoke2));
-        when(userJokeService.getAllUserJokes()).thenReturn(List.of(testUserJoke.toDto(), testUserJoke2.toDto()));
+        List<UserJoke> userJokes = List.of(testUserJoke, testUserJoke2);
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = new PageImpl<>(userJokes, pageRequest, userJokes.size());
+        when(userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest)).thenReturn(userJokePage);
+
+        List<UserJokeDto> userJokeDtos = userJokes.stream()
+                .map(UserJoke::toDto)
+                .toList();
+        Page<UserJokeDto> userJokeDtoPage = new PageImpl<>(userJokeDtos, pageRequest, userJokeDtos.size());
+
+        when(userJokeService.getAllUserJokes(0)).thenReturn(userJokeDtoPage);
         mockMvc.perform(get("/api/v1/allUserJoke"))
                 .andDo(print())
                 .andDo(document("userJokes/get",
                         responseFields(
-                                fieldWithPath("[].joke.jokeId").description("개그 ID"),
-                                fieldWithPath("[].joke.question").description("개그 질문"),
-                                fieldWithPath("[].joke.answer").description("개그 답변"),
-                                fieldWithPath("[].user.id").description("유저 ID"),
-                                fieldWithPath("[].user.profile").description("유저 프로필 (null 가능)"),
-                                fieldWithPath("[].user.nickname").description("유저 닉네임")
+                                fieldWithPath("content[].joke.jokeId").description("개그 ID"),
+                                fieldWithPath("content[].joke.question").description("개그 질문"),
+                                fieldWithPath("content[].joke.answer").description("개그 답변"),
+                                fieldWithPath("content[].user.id").description("유저 ID"),
+                                fieldWithPath("content[].user.profile").description("유저 프로필 (null 가능)"),
+                                fieldWithPath("content[].user.nickname").description("유저 닉네임"),
+                                fieldWithPath("pageable.pageNumber").description("현재 페이지 번호"),
+                                fieldWithPath("pageable.pageSize").description("페이지 크기"),
+                                fieldWithPath("pageable.offset").description("페이징 시작점"),
+                                fieldWithPath("pageable.paged").description("페이징 여부"),
+                                fieldWithPath("pageable.unpaged").description("비페이징 여부"),
+                                fieldWithPath("pageable.sort.empty").description("정렬 여부"),
+                                fieldWithPath("pageable.sort.sorted").description("정렬 여부"),
+                                fieldWithPath("pageable.sort.unsorted").description("미정렬 여부"),
+                                fieldWithPath("last").description("마지막 페이지 여부"),
+                                fieldWithPath("totalElements").description("총 개체 수"),
+                                fieldWithPath("totalPages").description("총 페이지 수"),
+                                fieldWithPath("first").description("첫 페이지 여부"),
+                                fieldWithPath("size").description("페이지 크기"),
+                                fieldWithPath("number").description("현재 페이지 번호"),
+                                fieldWithPath("sort.empty").description("정렬 요소가 비어 있는지 여부"),
+                                fieldWithPath("sort.sorted").description("정렬 여부"),
+                                fieldWithPath("sort.unsorted").description("미정렬 여부"),
+                                fieldWithPath("numberOfElements").description("현재 페이지의 요소 수"),
+                                fieldWithPath("empty").description("페이지가 비어 있는지 여부")
                         )));
     }
 
@@ -272,8 +306,17 @@ class JokeControllerWebMvcTest {
     @WithMockUser
     @DisplayName("유저개그 빈 리스트를 조회 한다. (개그와 유저정보) ")
     void getAllUserJokesIsEmpty() throws Exception {
-        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of());
-        when(userJokeService.getAllUserJokes()).thenReturn(List.of());
+        List<UserJoke> userJokes = List.of();
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = new PageImpl<>(userJokes, pageRequest, 0);
+        when(userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest)).thenReturn(userJokePage);
+
+        List<UserJokeDto> userJokeDtos = userJokes.stream()
+                .map(UserJoke::toDto)
+                .toList();
+
+        Page<UserJokeDto> userJokeDtoPage = new PageImpl<>(userJokeDtos, pageRequest, 0);
+        when(userJokeService.getAllUserJokes(0)).thenReturn(userJokeDtoPage);
         mockMvc.perform(get("/api/v1/allUserJoke"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("등록된 개그가 없습니다."))

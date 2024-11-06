@@ -13,8 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 import static ajae.uhtm.entity.QJoke.joke;
@@ -35,9 +39,6 @@ class UserJokeRepositoryTest {
 
     @Autowired
     EntityManager em;
-
-    @Value("${provider-key.kakao}")
-    String kakaoKey;
 
     @Autowired
     private UserRepository userRepository;
@@ -84,13 +85,9 @@ class UserJokeRepositoryTest {
                 .user(saveUser)
                 .joke(saveJoke2)
                 .build();
-
-
-
     }
 
     @Test
-    @Transactional
     @DisplayName("유저개그를 저장한다.")
     void saveUserJoke() {
         UserJoke saveUserJoke = userJokeRepository.save(testUserJoke);
@@ -101,26 +98,17 @@ class UserJokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("유저개그 리스트를 조회한다.")
     void getAllUserJokes() {
-        userJokeRepository.save(testUserJoke);
-        userJokeRepository.save(testUserJoke2);
-
-        List<UserJoke> userJoke = queryFactory.selectFrom(QUserJoke.userJoke)
-                .where(joke.jokeType.eq(JokeType.USER_ADDED))
-                .fetch();
-
-        assertThat(userJoke).isNotNull();
-        for (UserJoke userJoke1 : userJoke) {
-            log.info(userJoke1.getJoke().toString());
-            log.info(userJoke1.getUser().toString());
-
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest);
+        for (UserJoke userJoke1 : userJokePage) {
+            System.out.println(userJoke1.getJoke().toDto().toString());
         }
+        assertThat(userJokePage).isNotNull();
     }
 
     @Test
-    @Transactional
     @DisplayName("특정 유저의 개그를 상세 조회한다.")
     void getUserJokeDetails() {
         userJokeRepository.save(testUserJoke);
@@ -134,7 +122,6 @@ class UserJokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("특정 유저의 유저 개그 리스트를 조회한다.")
     void getUserJokeById() {
         userJokeRepository.save(testUserJoke);

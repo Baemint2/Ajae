@@ -9,6 +9,7 @@ import ajae.uhtm.service.UserJokeService;
 import ajae.uhtm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,8 +47,8 @@ public class JokeController {
 
     // 유저개그 리스트를 조회한다.
     @GetMapping("/api/v1/allUserJoke")
-    public ResponseEntity<?> getAllUserJoke() {
-        List<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes();
+    public ResponseEntity<?> getAllUserJoke(@RequestParam(required = false, defaultValue = "0", value = "page") int pageNo) {
+        Page<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes(pageNo);
 
         if(allUserJokes.isEmpty()){
             return ResponseEntity.badRequest().body(Map.of("message", "등록된 개그가 없습니다."));

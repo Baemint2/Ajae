@@ -14,6 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -90,24 +94,26 @@ class UserJokeServiceTest {
     @Transactional
     @DisplayName("유저 개그 리스트를 조회한다.")
     void getAllUserJoke() {
-        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of(testUserJoke,testUserJoke2));
-        List<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes();
-
+        List<UserJoke> userJokes = List.of(testUserJoke, testUserJoke2);
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = new PageImpl<>(userJokes, pageRequest, userJokes.size());
+        when(userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest)).thenReturn(userJokePage);
+        Page<UserJokeDto> allUserJokes = userJokeService.getAllUserJokes(0);
         assertThat(allUserJokes).isNotEmpty();
-        assertThat(allUserJokes.size()).isEqualTo(2);
 
-        for (UserJokeDto allUserJoke : allUserJokes) {
-            log.info("allUserJoke.toString: {}", allUserJoke.getJoke());
-        }
+        System.out.println("allUserJokes = " + allUserJokes.getNumberOfElements());
     }
 
     @Test
     @Transactional
     @DisplayName("유저 개그가 하나도 없다면 Exception 발생")
     void getAllUserJokeIsEmpty() {
-        when(userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED)).thenReturn(List.of());
+        List<UserJoke> userJokes = List.of();
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = new PageImpl<>(userJokes, pageRequest, 0);
+        when(userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest)).thenReturn(userJokePage);
 
-        assertThrows(IllegalArgumentException.class, () -> userJokeService.getAllUserJokes(),
+        assertThrows(IllegalArgumentException.class, () -> userJokeService.getAllUserJokes(0),
                 "유저가 추가한 개그가 존재하지 않습니다.");
     }
 

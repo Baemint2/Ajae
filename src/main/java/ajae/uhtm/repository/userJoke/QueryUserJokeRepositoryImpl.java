@@ -1,13 +1,11 @@
 package ajae.uhtm.repository.userJoke;
 
-import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.JokeType;
 import ajae.uhtm.entity.UserJoke;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
-import java.util.Optional;
 
 import static ajae.uhtm.entity.QJoke.joke;
 import static ajae.uhtm.entity.QUser.user;

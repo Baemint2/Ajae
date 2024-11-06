@@ -7,6 +7,9 @@ import ajae.uhtm.entity.UserJoke;
 import ajae.uhtm.repository.userJoke.UserJokeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,14 +28,14 @@ public class UserJokeService {
     }
 
     @Transactional
-    public List<UserJokeDto> getAllUserJokes() {
-        List<UserJoke> userJokes = userJokeRepository.selectAllUserJoke(JokeType.USER_ADDED);
-        if(userJokes.isEmpty()) {
+    public Page<UserJokeDto> getAllUserJokes(int pageNo) {
+        PageRequest pageRequest = PageRequest.of(pageNo, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<UserJoke> userJokePage = userJokeRepository.findAllByJokeJokeType(JokeType.USER_ADDED, pageRequest);
+
+        if(userJokePage.isEmpty()) {
             throw new IllegalArgumentException("유저가 추가한 개그가 존재하지 않습니다.");
         }
-        return userJokes.stream()
-                .map(UserJoke::toDto)
-                .toList();
+        return userJokePage.map(UserJoke::toDto);
     }
 
     @Transactional
