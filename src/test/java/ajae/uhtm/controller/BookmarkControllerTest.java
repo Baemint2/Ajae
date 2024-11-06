@@ -206,7 +206,7 @@ class BookmarkControllerTest {
     @DisplayName("특정 유저가 특정 개그를 북마크등록 했는지 체크한다.")
     void checkBookmark() throws Exception {
 
-        when(bookmarkService.checkBookmark(any(String.class), any(String.class))).thenReturn(true);
+        when(bookmarkService.checkBookmark(any(String.class), any(Long.class))).thenReturn(true);
         mockMvc.perform(post("/api/v1/check")
                         .contentType(APPLICATION_JSON)
                         .with(jwtCookieProcessor)
@@ -220,7 +220,7 @@ class BookmarkControllerTest {
     @WithMockUser
     @DisplayName("특정 유저가 특정 개그를 북마크등록 했는지 체크한다.")
     void checkBookmark_fail() throws Exception {
-        when(bookmarkService.checkBookmark(any(String.class), any(String.class))).thenReturn(false);
+        when(bookmarkService.checkBookmark(any(String.class), any(Long.class))).thenReturn(false);
         mockMvc.perform(post("/api/v1/check")
                         .contentType(APPLICATION_JSON)
                         .with(jwtCookieProcessor)
@@ -251,8 +251,7 @@ class BookmarkControllerTest {
     @DisplayName("특정 유저가 북마크에 등록한 개그가 없다.")
     void getAllJokeIsEmpty() throws Exception {
 
-        List<JokeDto> result = List.of();
-        when(bookmarkService.getAllJoke(any(String.class))).thenReturn(result);
+        when(bookmarkService.getAllJoke(any(String.class))).thenReturn(List.of());
         mockMvc.perform(get("/api/v1/allJoke")
                         .with(jwtCookieProcessor)
                         .contentType(APPLICATION_JSON))

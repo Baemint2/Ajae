@@ -10,4 +10,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long>, Query
     @Modifying
     @Query("update Bookmark b SET b.isDeleted = true where b.id = :id")
     int deleteBookmarkById(long id);
+
+    @Modifying
+    @Query("update Bookmark b SET b.isDeleted = false where b.id = :id")
+    int updateBookmarkById(long id);
 }

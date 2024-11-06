@@ -153,4 +153,23 @@ class BookmarkRepositoryTest {
     private BooleanExpression userEq(Long userId) {
         return user.id != null ? user.id.eq(userId) : null;
     }
+
+    @Test
+    @Transactional
+    @DisplayName("북마크가 이미 테이블에 존재하면 isDeleted를 false로 업데이트한다.")
+    void updatedBookmark() {
+        List<Joke> bookmarks = bookmarkRepository.getBookmarks(testUser.getId());
+        int i = 0;
+        i = bookmarkRepository.deleteBookmarkById(testBookmark.getId());
+        bookmarks = bookmarkRepository.getBookmarks(testUser.getId());
+        for (Joke bookmark : bookmarks) {
+            System.out.println("bookmark = " + bookmark.toString());
+        }
+
+        i = bookmarkRepository.updateBookmarkById(testBookmark.getId());
+        bookmarks = bookmarkRepository.getBookmarks(testUser.getId());
+        for (Joke bookmark : bookmarks) {
+            System.out.println("bookmark = " + bookmark.toString());
+        }
+    }
 }

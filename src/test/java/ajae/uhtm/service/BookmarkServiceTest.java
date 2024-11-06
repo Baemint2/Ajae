@@ -132,7 +132,7 @@ class BookmarkServiceTest {
     void 북마크_체크_존재() {
         when(bookmarkRepository.checkBookmark(testUser.getId(), testJoke.getId())).thenReturn(true);
 
-        boolean bookmark = bookmarkService.checkBookmark(testUser.getProviderKey(), testJoke.getQuestion());
+        boolean bookmark = bookmarkService.checkBookmark(testUser.getProviderKey(), testJoke.getId());
 
         assertTrue(bookmark);
     }
@@ -140,7 +140,7 @@ class BookmarkServiceTest {
     @Test
     void 북마크_체크_없음() {
         when(bookmarkRepository.checkBookmark(testUser.getId(), testJoke.getId())).thenReturn(false);
-        boolean bookmark = bookmarkService.checkBookmark(testUser.getProviderKey(), testJoke.getQuestion());
+        boolean bookmark = bookmarkService.checkBookmark(testUser.getProviderKey(), testJoke.getId());
 
         assertFalse(bookmark);
 

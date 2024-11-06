@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static ajae.uhtm.entity.QJoke.joke;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,11 +50,11 @@ public class BookmarkService {
                 .map(Joke::toDto)
                 .toList();
     }
+
     @Transactional
-    public Boolean checkBookmark(String providerKey, String question) {
+    public Boolean checkBookmark(String providerKey, long jokeId) {
         User user = userService.findByUsername(providerKey);
-        Joke joke = jokeService.findByQuestion(question);
-        return bookmarkRepository.checkBookmark(user.getId(), joke.getId());
+        return bookmarkRepository.checkBookmark(user.getId(), jokeId);
     }
 
     @Transactional
@@ -60,5 +62,12 @@ public class BookmarkService {
         User user = userService.findByUsername(providerKey);
         long bookmark = bookmarkRepository.getBookmark(user.getId(), jokeId);
         return bookmarkRepository.deleteBookmarkById(bookmark);
+    }
+
+    @Transactional
+    public int updateBookmark(String providerKey, long jokeId) {
+        User user = userService.findByUsername(providerKey);
+        long bookmark = bookmarkRepository.getBookmark(user.getId(), jokeId);
+        return bookmarkRepository.updateBookmarkById(bookmark);
     }
 }
