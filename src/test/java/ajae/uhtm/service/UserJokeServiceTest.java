@@ -142,7 +142,7 @@ class UserJokeServiceTest {
     @DisplayName("특정 유저가 추가한 유저 개그의 개수를 조회한다")
     void getUserJokeCountById() {
     when(userJokeRepository.countUserJoke(testUser.getId())).thenReturn(2L);
-        Long l = userJokeService.countUserJoke(testUser.getId());
-        assertThat(l).isEqualTo(2L);
+        Long userJokeCount = userJokeService.countUserJoke(testUser.getId());
+        assertThat(userJokeCount).isEqualTo(2L);
     }
 }
