@@ -51,6 +51,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -134,7 +135,7 @@ class JokeControllerWebMvcTest {
                 .build();
 
         testUser = User.builder()
-                .providerKey("testProvider")
+                .username("moz1mozi")
                 .nickname("모지희")
                 .build();
 
@@ -144,12 +145,14 @@ class JokeControllerWebMvcTest {
                 .question("개가 한 마리만 사는 나라는?")
                 .answer("독일")
                 .jokeType(JokeType.USER_ADDED)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         testJoke2 = Joke.builder()
                 .question("아몬드가 죽으면?")
                 .answer("다이아몬드")
                 .jokeType(JokeType.USER_ADDED)
+                .createdAt(LocalDateTime.now())
                 .build();
 
         testJoke.testJokeId(1L);
@@ -222,7 +225,8 @@ class JokeControllerWebMvcTest {
                         responseFields(
                                 fieldWithPath("jokeId").description("개그 ID"),
                                 fieldWithPath("question").description("문제"),
-                                fieldWithPath("answer").description("정답"))
+                                fieldWithPath("answer").description("정답"),
+                                fieldWithPath("createdAt").description("생성된 시간"))
                 ));
     }
 
@@ -249,7 +253,8 @@ class JokeControllerWebMvcTest {
                         requestFields(
                                 fieldWithPath("jokeId").description("개그번호"),
                                 fieldWithPath("question").description("문제"),
-                                fieldWithPath("answer").description("정답")),
+                                fieldWithPath("answer").description("정답"),
+                                fieldWithPath("createdAt").description("생성된 시간")),
                         responseFields(
                                 fieldWithPath("message").description( "문제 등록이 완료되었습니다.")
                         )));
@@ -277,6 +282,7 @@ class JokeControllerWebMvcTest {
                                 fieldWithPath("content[].joke.jokeId").description("개그 ID"),
                                 fieldWithPath("content[].joke.question").description("개그 질문"),
                                 fieldWithPath("content[].joke.answer").description("개그 답변"),
+                                fieldWithPath("content[].joke.createdAt").description("생성된 시간"),
                                 fieldWithPath("content[].user.id").description("유저 ID"),
                                 fieldWithPath("content[].user.profile").description("유저 프로필 (null 가능)"),
                                 fieldWithPath("content[].user.nickname").description("유저 닉네임"),
@@ -327,10 +333,22 @@ class JokeControllerWebMvcTest {
     @WithMockUser
     @DisplayName("특정 유저의 유저개그 리스트를 조회한다. ")
     void getUserJokes() throws Exception {
-        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
         when(userJokeService.findAllJokesByUserId(testUser.getId())).thenReturn(List.of(testJoke.toDto(), testJoke2.toDto()));
         mockMvc.perform(get("/api/v1/userJoke")
                         .with(jwtCookieProcessor))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("특정 유저의 유저개그 개수를 조회한다. ")
+    void getUserJokeCountByUserId() throws Exception {
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(userJokeService.countUserJoke(testUser.getId())).thenReturn(2L);
+        mockMvc.perform(get("/api/v1/userJoke/count")
+                .with(jwtCookieProcessor))
                 .andExpect(status().isOk())
                 .andDo(print());
     }

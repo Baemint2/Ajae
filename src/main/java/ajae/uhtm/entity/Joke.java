@@ -5,6 +5,7 @@ import ajae.uhtm.dto.joke.JokeRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class Joke extends BaseTimeEntity {
     }
 
     @Builder
-    public Joke(String question, String answer, JokeType jokeType, List<UserJoke> userJokeList) {
+    public Joke(String question, String answer, JokeType jokeType, List<UserJoke> userJokeList, LocalDateTime createdAt) {
         this.question = question;
         this.answer = answer;
         this.jokeType = jokeType;
@@ -48,7 +49,7 @@ public class Joke extends BaseTimeEntity {
     }
 
     public JokeDto toDto() {
-        return new JokeDto(this.id, this.question, this.answer, this.jokeType);
+        return new JokeDto(this.id, this.question, this.answer, this.jokeType, this.getCreatedAt());
     }
 
     public JokeRequestDto toRequestDto() {

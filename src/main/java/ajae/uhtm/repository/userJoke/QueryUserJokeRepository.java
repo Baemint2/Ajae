@@ -14,4 +14,5 @@ public interface QueryUserJokeRepository {
 
     List<UserJoke> selectUserJokeById(long userId);
 
+    Long countUserJoke(long userId);
 }

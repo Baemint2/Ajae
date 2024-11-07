@@ -43,4 +43,12 @@ public class QueryUserJokeRepositoryImpl implements QueryUserJokeRepository {
                 .where(user.id.eq(userId))
                 .fetch();
     }
+
+    @Override
+    public Long countUserJoke(long userId) {
+        return queryFactory.select(userJoke.count())
+                .from(userJoke)
+                .where(user.id.eq(userId))
+                .fetchOne();
+    }
 }

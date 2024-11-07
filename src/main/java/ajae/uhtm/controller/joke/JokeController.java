@@ -3,6 +3,7 @@ package ajae.uhtm.controller.joke;
 import ajae.uhtm.dto.UserJokeDto;
 import ajae.uhtm.dto.UserJokeIdDto;
 import ajae.uhtm.dto.joke.JokeDto;
+import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.User;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
@@ -40,8 +41,9 @@ public class JokeController {
     public ResponseEntity<Map<String, String>> saveJoke(@RequestBody JokeDto jokeDto){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String name = auth.getName();
-        jokeService.saveJoke(jokeDto.toEntity(), name);
-
+        log.info("name = {}", name);
+        Joke joke = jokeService.saveJoke(jokeDto.toEntity(), name);
+        log.info("[saveJoke] : {} ", joke.toString());
         return ResponseEntity.ok(Map.of("message", "문제 등록이 완료되었습니다."));
     }
 
@@ -72,6 +74,14 @@ public class JokeController {
         List<JokeDto> jokesByUserId = userJokeService.findAllJokesByUserId(user.getId());
 
         return ResponseEntity.ok(jokesByUserId);
+    }
+
+    @GetMapping("/api/v1/userJoke/count")
+    public ResponseEntity<Long> countUserJokes(Principal principal) {
+        User user = userService.findByUsername(principal.getName());
+        log.info("userId = {}", user.toString());
+        long count = userJokeService.countUserJoke(user.getId());
+        return ResponseEntity.ok(count);
     }
 
 }
