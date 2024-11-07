@@ -53,4 +53,9 @@ public class UserJokeService {
                 .map(UserJokeDto::getJoke)
                 .toList();
     }
+
+    @Transactional
+    public Long countUserJoke(long userId) {
+        return userJokeRepository.countUserJoke(userId);
+    }
 }

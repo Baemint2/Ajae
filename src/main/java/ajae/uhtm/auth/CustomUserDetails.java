@@ -32,7 +32,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userDto.getProviderKey();
+        if (userDto.getProviderKey() != null && !userDto.getProviderKey().isEmpty()) {
+            return userDto.getProviderKey();
+        } else {
+            return userDto.getUsername();
+        }
     }
 
     @Override

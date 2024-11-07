@@ -8,6 +8,8 @@ import lombok.Getter;
 @Builder
 public class UserDto {
 
+    private long id;
+    private String username;
     private String email;
     private String profile;
     private String nickname;
@@ -17,6 +19,7 @@ public class UserDto {
 
     public User toEntity() {
         return User.builder()
+                .username(username)
                 .email(email)
                 .nickname(nickname)
                 .profile(profile)

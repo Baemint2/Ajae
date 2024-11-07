@@ -70,6 +70,7 @@ public class User extends BaseTimeEntity {
 
     public UserDto toDto() {
         return UserDto.builder()
+                .username(username)
                 .email(email)
                 .nickname(nickname)
                 .profile(profile)

@@ -20,7 +20,8 @@ public class UserService {
     public User findByUsername(String username){
         log.info("username: {}", username);
         return userRepository.findByProviderKey(username)
-                            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+                .or(() -> userRepository.findByUsername(username))
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
 
     @Transactional

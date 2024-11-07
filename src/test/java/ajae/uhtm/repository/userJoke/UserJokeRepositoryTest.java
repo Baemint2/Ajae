@@ -10,15 +10,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 import static ajae.uhtm.entity.QJoke.joke;
@@ -66,6 +63,7 @@ class UserJokeRepositoryTest {
                 .answer("독일")
                 .jokeType(JokeType.USER_ADDED)
                 .build();
+
         testJoke2 = Joke.builder()
                 .question("아몬드가 죽으면?")
                 .answer("다이아몬드")
@@ -90,7 +88,12 @@ class UserJokeRepositoryTest {
     @Test
     @DisplayName("유저개그를 저장한다.")
     void saveUserJoke() {
-        UserJoke saveUserJoke = userJokeRepository.save(testUserJoke);
+        User user1 = userRepository.findByUsername("moz1mozi").orElseThrow(IllegalArgumentException::new);
+        UserJoke userJoke1 = UserJoke.builder()
+                .user(user1)
+                .joke(testJoke)
+                .build();
+        UserJoke saveUserJoke = userJokeRepository.save(userJoke1);
 
         assertNotNull(saveUserJoke);
         assertThat(saveUserJoke.getJoke()).isEqualTo(testJoke);
@@ -135,5 +138,17 @@ class UserJokeRepositoryTest {
         }
     }
 
+    @Test
+    @DisplayName("특정 유저가 추가한 유저 개그의 개수 체크")
+    void getUserJokeCount() {
+        userJokeRepository.save(testUserJoke);
+        userJokeRepository.save(testUserJoke2);
 
+        Long l = queryFactory.select(userJoke.count())
+                .from(userJoke)
+                .where(user.id.eq(testUser.getId()))
+                .fetchOne();
+
+        log.info("userCount = {}", l);
+    }
 }
