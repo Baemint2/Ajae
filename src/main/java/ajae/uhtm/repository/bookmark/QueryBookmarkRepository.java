@@ -12,5 +12,8 @@ public interface QueryBookmarkRepository {
     // 해당 개그가 이미 북마크에 포함되어 있는지
     Boolean checkBookmark(Long userId, Long jokeId);
 
-    long getBookmark(Long userId, Long jokeId);
+    Long getBookmark(Long userId, Long jokeId);
+
+    Long countBookmark(long userId);
+
 }

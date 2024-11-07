@@ -25,9 +25,9 @@ public class BookmarkService {
     private final UserService userService;
 
     @Transactional
-    public long addBookmark(Joke joke, String providerKey) {
+    public long addBookmark(Joke joke, String username) {
 
-        User byUsername = userService.findByUsername(providerKey);
+        User byUsername = userService.findByUsername(username);
         Joke byQuestion = jokeService.findByQuestion(joke.getQuestion());
 
         Bookmark bookmark = Bookmark.builder()
@@ -52,22 +52,31 @@ public class BookmarkService {
     }
 
     @Transactional
-    public Boolean checkBookmark(String providerKey, long jokeId) {
-        User user = userService.findByUsername(providerKey);
+    public Boolean checkBookmark(String username, long jokeId) {
+        User user = userService.findByUsername(username);
         return bookmarkRepository.checkBookmark(user.getId(), jokeId);
     }
 
     @Transactional
-    public int deleteBookmark(String providerKey, long jokeId) {
-        User user = userService.findByUsername(providerKey);
+    public int deleteBookmark(String username, long jokeId) {
+        User user = userService.findByUsername(username);
         long bookmark = bookmarkRepository.getBookmark(user.getId(), jokeId);
+
+        if(bookmark == 0) {
+            throw new IllegalArgumentException("해당 북마크는 존재하지 않습니다.");
+        }
         return bookmarkRepository.deleteBookmarkById(bookmark);
     }
 
     @Transactional
-    public int updateBookmark(String providerKey, long jokeId) {
-        User user = userService.findByUsername(providerKey);
+    public int updateBookmark(String username, long jokeId) {
+        User user = userService.findByUsername(username);
         long bookmark = bookmarkRepository.getBookmark(user.getId(), jokeId);
         return bookmarkRepository.updateBookmarkById(bookmark);
+    }
+
+    @Transactional
+    public Long countBookmark(long userId) {
+        return bookmarkRepository.countBookmark(userId);
     }
 }

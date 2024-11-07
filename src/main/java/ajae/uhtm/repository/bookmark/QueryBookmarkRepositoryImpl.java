@@ -10,6 +10,7 @@ import java.util.List;
 import static ajae.uhtm.entity.QBookmark.bookmark;
 import static ajae.uhtm.entity.QJoke.joke;
 import static ajae.uhtm.entity.QUser.user;
+import static ajae.uhtm.entity.QUserJoke.userJoke;
 
 public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
 
@@ -41,7 +42,7 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
     }
 
     @Override
-    public long getBookmark(Long userId, Long jokeId) {
+    public Long getBookmark(Long userId, Long jokeId) {
         return queryFactory.select(bookmark.id)
                 .from(bookmark)
                 .where(jokeEq(jokeId),
@@ -55,5 +56,13 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
 
     private BooleanExpression userEq(Long userId) {
         return user.id != null ? user.id.eq(userId) : null;
+    }
+
+    @Override
+    public Long countBookmark(long userId) {
+        return queryFactory.select(bookmark.count())
+                .from(bookmark)
+                .where(user.id.eq(userId))
+                .fetchOne();
     }
 }

@@ -14,14 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static ajae.uhtm.entity.QBookmark.bookmark;
 import static ajae.uhtm.entity.QJoke.joke;
 import static ajae.uhtm.entity.QUser.user;
+import static ajae.uhtm.entity.QUserJoke.userJoke;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @DataJpaTest
@@ -88,7 +90,6 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 북마크_추가() {
         User user = userRepository.findByProviderKey(testUser.getProviderKey())
                 .orElseThrow(IllegalStateException::new);
@@ -104,7 +105,6 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("특정 북마크를 제거한다.")
     void 북마크_제거() {
         List<Joke> bookmarks = bookmarkRepository.getBookmarks(testUser.getId());
@@ -118,13 +118,12 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 북마크_체크_true() {
         User user = userRepository.findByProviderKey(testUser.getProviderKey())
                 .orElseThrow(IllegalStateException::new);
         Joke joke = jokeRepository.findById(testBookmark.getJoke().getId()).orElseThrow();
 
-        boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
+        boolean bookmark1 = queryFactory.selectFrom(bookmark)
                 .where(jokeEq(joke.getId()),
                         userEq(user.getId()))
                 .fetchOne() != null;
@@ -133,12 +132,11 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 북마크_체크_false() {
         Joke joke = jokeRepository.findById(testBookmark.getJoke().getId())
                 .orElseThrow(IllegalStateException::new);
 
-        boolean bookmark1 = queryFactory.selectFrom(QBookmark.bookmark)
+        boolean bookmark1 = queryFactory.selectFrom(bookmark)
                 .where(jokeEq(joke.getId()),
                         userEq(-1L))
                 .fetchOne() != null;
@@ -155,7 +153,6 @@ class BookmarkRepositoryTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("북마크가 이미 테이블에 존재하면 isDeleted를 false로 업데이트한다.")
     void updatedBookmark() {
         List<Joke> bookmarks = bookmarkRepository.getBookmarks(testUser.getId());
@@ -171,5 +168,16 @@ class BookmarkRepositoryTest {
         for (Joke bookmark : bookmarks) {
             System.out.println("bookmark = " + bookmark.toString());
         }
+    }
+
+    @Test
+    @DisplayName("특정 유저가 등록한 북마크의 개수를 조회한다")
+    void getUserJokeCountById() {
+        Long l = queryFactory.select(bookmark.count())
+                .from(bookmark)
+                .where(user.id.eq(testUser.getId()))
+                .fetchOne();
+
+        log.info("bookmarkCount = {}", l);
     }
 }

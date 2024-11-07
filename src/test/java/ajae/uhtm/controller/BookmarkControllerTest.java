@@ -308,6 +308,17 @@ class BookmarkControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("북마크가 제거되었습니다."))
                 .andDo(print());
+    }
 
+    @Test
+    @WithMockUser
+    @DisplayName("특정 유저가 등록한 북마크의 개수를 조회한다")
+    void countBookmarkByUser() throws Exception {
+        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
+        when(bookmarkService.countBookmark(testUser.getId())).thenReturn(2L);
+        mockMvc.perform(get("/api/v1/bookmark/count")
+                .with(jwtCookieProcessor))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 }
