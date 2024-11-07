@@ -34,7 +34,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         String token = resolveToken(request);
 
-        if (isExcludedPath(request.getRequestURI())) {
+        if (isExcludedPath(request.getRequestURI(), request.getMethod())) {
             chain.doFilter(request, response);
             return;
         }
@@ -116,7 +116,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isExcludedPath(String requestURI) {
+    private boolean isExcludedPath(String requestURI, String method) {
         return requestURI.equals("/login") ||
 //                requestURI.equals("/api/auth/logout/v1") ||
 //                requestURI.equals("/user/login") ||
@@ -128,7 +128,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 requestURI.contains("/login.js") ||
                 requestURI.startsWith("/oauth2/authorization") ||  // OAuth2 로그인 요청 경로
                 requestURI.startsWith("/login/oauth2/code") ||
-                requestURI.startsWith("/api/v1/joke") ||
+                requestURI.equals("/api/v1/joke") && method.equalsIgnoreCase("GET") ||
                 requestURI.startsWith("/api/v1/check") ;
     }
 
