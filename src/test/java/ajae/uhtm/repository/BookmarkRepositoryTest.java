@@ -175,7 +175,7 @@ class BookmarkRepositoryTest {
     void getUserJokeCountById() {
         Long l = queryFactory.select(bookmark.count())
                 .from(bookmark)
-                .where(user.id.eq(testUser.getId()))
+                .where(user.id.eq(testUser.getId()), bookmark.isDeleted.eq(false))
                 .fetchOne();
 
         log.info("bookmarkCount = {}", l);

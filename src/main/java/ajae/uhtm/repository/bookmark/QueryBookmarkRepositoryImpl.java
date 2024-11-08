@@ -62,7 +62,7 @@ public class QueryBookmarkRepositoryImpl implements QueryBookmarkRepository {
     public Long countBookmark(long userId) {
         return queryFactory.select(bookmark.count())
                 .from(bookmark)
-                .where(user.id.eq(userId))
+                .where(user.id.eq(userId), bookmark.isDeleted.eq(false))
                 .fetchOne();
     }
 }
