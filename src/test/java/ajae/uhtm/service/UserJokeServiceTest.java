@@ -34,6 +34,9 @@ class UserJokeServiceTest {
     private UserJokeService userJokeService;
 
     @Mock
+    private UserService userService;
+
+    @Mock
     private UserJokeRepository userJokeRepository;
 
     User testUser;
@@ -144,5 +147,25 @@ class UserJokeServiceTest {
     when(userJokeRepository.countUserJoke(testUser.getId())).thenReturn(2L);
         Long userJokeCount = userJokeService.countUserJoke(testUser.getId());
         assertThat(userJokeCount).isEqualTo(2L);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("해당 개그를 특정 유저가 등록 했는지 안했는지 체크 (성공)")
+    void existsUserJokeByUserId() {
+        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
+        when(userJokeRepository.existsUserJokeByUserId(testUser.getId(), testJoke.getId())).thenReturn(true);
+        Boolean userJoke = userJokeService.existsUserJokeByUserId(testUser.getId(), testJoke.getId());
+        System.out.println("b = " + userJoke);
+    }
+
+    @Test
+    @Transactional
+    @DisplayName("해당 개그를 특정 유저가 등록 했는지 안했는지 체크 (실패)")
+    void existsUserJokeByUserId_fail() {
+        when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
+        when(userJokeRepository.existsUserJokeByUserId(testUser.getId(), testJoke.getId())).thenReturn(false);
+        Boolean userJoke = userJokeService.existsUserJokeByUserId(testUser.getId(), testJoke.getId());
+        System.out.println("b = " + userJoke);
     }
 }

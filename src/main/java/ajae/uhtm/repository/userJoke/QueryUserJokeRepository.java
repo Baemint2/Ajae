@@ -15,4 +15,7 @@ public interface QueryUserJokeRepository {
     List<UserJoke> selectUserJokeById(long userId);
 
     Long countUserJoke(long userId);
+
+    // 유저개그가 존재하는지 체크
+    Boolean existsUserJokeByUserId(Long userId, Long jokeId);
 }

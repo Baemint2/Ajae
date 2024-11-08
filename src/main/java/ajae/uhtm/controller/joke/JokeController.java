@@ -5,6 +5,7 @@ import ajae.uhtm.dto.UserJokeIdDto;
 import ajae.uhtm.dto.joke.JokeDto;
 import ajae.uhtm.entity.Joke;
 import ajae.uhtm.entity.User;
+import ajae.uhtm.entity.UserJoke;
 import ajae.uhtm.service.JokeService;
 import ajae.uhtm.service.UserJokeService;
 import ajae.uhtm.service.UserService;
@@ -82,6 +83,14 @@ public class JokeController {
         log.info("userId = {}", user.toString());
         long count = userJokeService.countUserJoke(user.getId());
         return ResponseEntity.ok(count);
+    }
+
+    @PostMapping("/api/v1/userJoke/check")
+    public ResponseEntity<?> existsUserJokeByUserId(@RequestBody JokeDto jokeDto,
+                                                          Principal principal){
+        User user = userService.findByUsername(principal.getName());
+        Boolean existsUserJoke = userJokeService.existsUserJokeByUserId(user.getId(), jokeDto.getId());
+        return ResponseEntity.ok(existsUserJoke);
     }
 
 }

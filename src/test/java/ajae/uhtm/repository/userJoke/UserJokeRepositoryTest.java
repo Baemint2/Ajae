@@ -151,4 +151,13 @@ class UserJokeRepositoryTest {
 
         log.info("userCount = {}", l);
     }
+
+    @Test
+    @DisplayName("해당 개그를 특정 유저가 등록 했는지 안했는지 체크")
+    void 개그_체크() {
+        boolean checkUserJoke = queryFactory.selectFrom(userJoke)
+                .where(user.id.eq(testUser.getId()), joke.id.eq(testJoke.getId()))
+                .fetchOne() != null;
+        System.out.println("checkUserJoke = " + checkUserJoke);
+    }
 }

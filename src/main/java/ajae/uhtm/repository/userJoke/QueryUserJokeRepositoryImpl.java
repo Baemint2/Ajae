@@ -51,4 +51,13 @@ public class QueryUserJokeRepositoryImpl implements QueryUserJokeRepository {
                 .where(user.id.eq(userId))
                 .fetchOne();
     }
+
+    @Override
+    public Boolean existsUserJokeByUserId(Long userId, Long jokeId) {
+        return queryFactory
+                .selectFrom(userJoke)
+                .where(user.id.eq(userId))
+                .where(joke.id.eq(jokeId))
+                .fetchOne() != null;
+    }
 }

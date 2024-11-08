@@ -352,4 +352,19 @@ class JokeControllerWebMvcTest {
                 .andExpect(status().isOk())
                 .andDo(print());
     }
+
+    @Test
+    @WithMockUser
+    @DisplayName("해당 개그를 특정 유저가 등록 했는지 안했는지 체크하여 결과를 반환한다.")
+    void existsUserJokeByUserId() throws Exception {
+        when(userService.findByUsername(testUser.getUsername())).thenReturn(testUser);
+        when(userJokeService.existsUserJokeByUserId(testJoke.toDto().getId(), testUser.getId())).thenReturn(true);
+        mockMvc.perform(post("/api/v1/userJoke/check")
+                .with(jwtCookieProcessor)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(testJoke.toDto())))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
 }

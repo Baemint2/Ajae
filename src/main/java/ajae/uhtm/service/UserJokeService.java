@@ -58,4 +58,9 @@ public class UserJokeService {
     public Long countUserJoke(long userId) {
         return userJokeRepository.countUserJoke(userId);
     }
+
+    @Transactional
+    public Boolean existsUserJokeByUserId(Long userId, Long jokeId) {
+        return userJokeRepository.existsUserJokeByUserId(userId, jokeId);
+    }
 }
