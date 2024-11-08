@@ -25,14 +25,14 @@ public class BookmarkService {
     private final UserService userService;
 
     @Transactional
-    public long addBookmark(Joke joke, String username) {
+    public long addBookmark(JokeDto jokeDto, String username) {
 
-        User byUsername = userService.findByUsername(username);
-        Joke byQuestion = jokeService.findByQuestion(joke.getQuestion());
+        User user = userService.findByUsername(username);
+        Joke joke = jokeService.findById(jokeDto.toEntity().getId());
 
         Bookmark bookmark = Bookmark.builder()
-                .user(byUsername)
-                .joke(byQuestion)
+                .user(user)
+                .joke(joke)
                 .build();
 
         return bookmarkRepository.save(bookmark).getId();

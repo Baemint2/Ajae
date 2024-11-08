@@ -20,6 +20,7 @@ import java.util.Random;
 
 import static ajae.uhtm.entity.QJoke.joke;
 import static ajae.uhtm.entity.QUser.user;
+import static ajae.uhtm.entity.QUserJoke.userJoke;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,17 +47,17 @@ class JokeRepositoryTest {
 
     User testUser;
 
-    Joke testJoke;
+    Joke testJoke, testJoke2;
 
-    UserJoke testUserJoke;
+    UserJoke testUserJoke, testUserJoke2;
 
     @BeforeEach
     public void init() {
         queryFactory = new JPAQueryFactory(em);
 
         testUser = User.builder()
-                .username("testProvider")
-                .username("모지희")
+                .username("moz1mozi")
+                .nickname("모지희")
                 .build();
         
         testJoke = Joke.builder()
@@ -65,20 +66,32 @@ class JokeRepositoryTest {
                 .jokeType(JokeType.USER_ADDED)
                 .build();
 
+        testJoke2 = Joke.builder()
+                .question("개가 한 마리만 사는 나라는?")
+                .answer("독일")
+                .jokeType(JokeType.USER_ADDED)
+                .build();
+
         User saveUser = userRepository.save(testUser);
         Joke saveJoke = jokeRepository.save(testJoke);
+        Joke saveJoke2 = jokeRepository.save(testJoke2);
 
         testUserJoke = UserJoke.builder()
                 .user(saveUser)
                 .joke(saveJoke)
                 .build();
 
+        testUserJoke2 = UserJoke.builder()
+                .user(saveUser)
+                .joke(saveJoke2)
+                .build();
+
         userJokeRepository.save(testUserJoke);
+        userJokeRepository.save(testUserJoke2);
 
     }
 
     @Test
-    @Transactional
     void 랜덤인덱스_호출() {
 
         // false 사이즈를 구해서 rand
@@ -104,7 +117,6 @@ class JokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 특정인덱스_체크() {
 
         Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
@@ -122,7 +134,6 @@ class JokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 아재개그상태리셋() {
         jokeRepository.resetCalledStatus();
         Joke joke = jokeRepository.findById(testJoke.getId()).orElseThrow(IllegalArgumentException::new);
@@ -130,7 +141,6 @@ class JokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     void false_호출() {
         List<Joke> byCalledFalse = jokeRepository.findByCalledFalseAndJokeType(JokeType.DEFAULT);
         System.out.println("byCalledFalse = " + byCalledFalse);
@@ -145,7 +155,6 @@ class JokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     void 문제_중복_검증() {
         String question = "노트북의 반대말은?";
         String answer = "노트남";
@@ -165,7 +174,6 @@ class JokeRepositoryTest {
     }
 
     @Test
-    @Transactional
     @DisplayName("JokeType USER_ADDED 를 조회한다.")
     void 유저_개그() {
         List<Joke> byCalledFalseAndJokeType = jokeRepository.findByCalledFalseAndJokeType(JokeType.USER_ADDED);

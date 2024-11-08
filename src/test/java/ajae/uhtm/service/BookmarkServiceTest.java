@@ -100,7 +100,7 @@ class BookmarkServiceTest {
         testBookmark2.testBookmarkId(2L);
 
         when(userService.findByUsername(testUser.getProviderKey())).thenReturn(testUser);
-        when(jokeService.findByQuestion(anyString())).thenReturn(testJoke);
+        when(jokeService.findById(anyLong())).thenReturn(testJoke);
     }
 
     @Test
@@ -130,7 +130,7 @@ class BookmarkServiceTest {
 
         when(bookmarkRepository.save(any(Bookmark.class))).thenReturn(testBookmark);
 
-        long bookmark = bookmarkService.addBookmark(testJoke, testUser.getProviderKey());
+        long bookmark = bookmarkService.addBookmark(testJoke.toDto(), testUser.getProviderKey());
         System.out.println("bookmark = " + bookmark);
     }
 

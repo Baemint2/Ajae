@@ -264,7 +264,7 @@ class BookmarkControllerTest {
     @WithMockUser
     @DisplayName("특정 유저가 특정 개그를 북마크에 등록한다.")
     void addBookmark() throws Exception {
-        when(bookmarkService.addBookmark(any(Joke.class), any(String.class))).thenReturn( 10L);
+        when(bookmarkService.addBookmark(any(JokeDto.class), any(String.class))).thenReturn( 10L);
 
         mockMvc.perform(post("/api/v1/bookmark")
                         .contentType(APPLICATION_JSON)
@@ -280,7 +280,7 @@ class BookmarkControllerTest {
     @WithMockUser()
     @DisplayName("특정 유저가 특정 개그를 북마크에 등록 실패한다.")
     void addBookmark_fail() throws Exception {
-        when(bookmarkService.addBookmark(any(Joke.class), any(String.class))).thenReturn( 0L);
+        when(bookmarkService.addBookmark(any(JokeDto.class), any(String.class))).thenReturn( 0L);
         mockMvc.perform(post("/api/v1/bookmark")
                         .contentType(APPLICATION_JSON)
                         .with(jwtCookieProcessor)

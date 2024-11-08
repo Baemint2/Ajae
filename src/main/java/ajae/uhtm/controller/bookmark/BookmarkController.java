@@ -37,7 +37,7 @@ public class BookmarkController {
         if (checkBookmark) {
             result = bookmarkService.updateBookmark(name, jokeDto.getId());
         } else {
-            result = bookmarkService.addBookmark(jokeDto.toEntity(), name);
+            result = bookmarkService.addBookmark(jokeDto, name);
         }
 
         if (result > 0) {
