@@ -58,12 +58,13 @@ public class CustomOAuth2AccessTokenResponseClient implements OAuth2AccessTokenR
 
     @Override
     public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
-        RestTemplate rt = new RestTemplate();  // http요청을 쉽게 할 수 있는 라이브러리
+        RestTemplate rt = new RestTemplate();
 
         String code = authorizationGrantRequest
                         .getAuthorizationExchange()
                         .getAuthorizationResponse()
                         .getCode();
+
         // HttpHeaders 오브젝트 생성
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");

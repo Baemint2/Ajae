@@ -1,4 +1,4 @@
-package ajae.uhtm.controller;
+package com.ajae.uhtm.controller;
 
 import com.ajae.uhtm.controller.bookmark.BookmarkController;
 import com.ajae.uhtm.domain.bookmark.Bookmark;

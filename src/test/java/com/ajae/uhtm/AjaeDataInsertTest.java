@@ -1,4 +1,4 @@
-package ajae.uhtm;
+package com.ajae.uhtm;
 
 import com.ajae.uhtm.service.JokeService;
 import lombok.extern.slf4j.Slf4j;

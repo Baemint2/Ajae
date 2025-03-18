@@ -1,4 +1,4 @@
-package ajae.uhtm.controller;
+package com.ajae.uhtm.controller;
 
 import com.ajae.uhtm.controller.joke.JokeController;
 import com.ajae.uhtm.domain.joke.Joke;

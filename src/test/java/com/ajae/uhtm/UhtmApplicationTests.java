@@ -1,4 +1,4 @@
-package ajae.uhtm;
+package com.ajae.uhtm;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

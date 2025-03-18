@@ -1,4 +1,4 @@
-package ajae.uhtm.service;
+package com.ajae.uhtm.service;
 
 import com.ajae.uhtm.domain.joke.Joke;
 import com.ajae.uhtm.domain.joke.JokeType;

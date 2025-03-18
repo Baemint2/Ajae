@@ -1,0 +1,55 @@
+<configuration>
+
+    <!-- Console appender 설정 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:50000</destination>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <includeCallerData>false</includeCallerData>
+            <providers>
+                <timestamp/> <!-- @timestamp 유지 -->
+                <level/> <!-- 로그 레벨 유지 -->
+                <message/> <!-- 메시지만 유지 -->
+                <loggerName/> <!-- 로거 이름 유지 -->
+                <threadName/> <!-- 스레드 이름 유지 -->
+                <stackTrace/> <!-- 예외 발생 시 스택 트레이스 유지 -->
+            </providers>
+        </encoder>
+        <jsonGeneratorDecorator class="net.logstash.logback.decorate.CompositeJsonGeneratorDecorator">
+            <decorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+        </jsonGeneratorDecorator>
+    </appender>
+
+
+    <logger name="jdbc" level="OFF" additive="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.sqlonly" level="DEBUG" additive="false" >
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="jdbc.sqltiming" level="OFF" additive="false" >
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="org.hibernate.SQL" level="DEBUG" additive="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="com.ajae.uhtm.controller" level="DEBUG" additive="false" >
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="com.ajae.uhtm.service" level="DEBUG" additive="false" >
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="org.hibernate.sql" level="DEBUG" additive="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="LOGSTASH" />
+    </root>
+</configuration>
