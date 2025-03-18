@@ -1,23 +1,21 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.dto.UserJokeDto;
-import ajae.uhtm.dto.joke.JokeDto;
-import ajae.uhtm.entity.Joke;
-import ajae.uhtm.entity.JokeType;
-import ajae.uhtm.entity.User;
-import ajae.uhtm.entity.UserJoke;
-import ajae.uhtm.repository.joke.JokeRepository;
-import ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.domain.joke.Joke;
+import com.ajae.uhtm.domain.joke.JokeType;
+import com.ajae.uhtm.domain.user.User;
+import com.ajae.uhtm.domain.userJoke.UserJoke;
+import com.ajae.uhtm.dto.joke.JokeDto;
+import com.ajae.uhtm.repository.joke.JokeRepository;
+import com.ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.service.JokeService;
+import com.ajae.uhtm.service.UserJokeService;
+import com.ajae.uhtm.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 

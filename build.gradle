@@ -51,6 +51,7 @@ dependencies {
 
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor' // (3)
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     testCompileOnly 'org.projectlombok:lombok'
@@ -65,6 +66,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 }
 
 tasks.named('test') {
@@ -72,12 +75,27 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-def generated = 'build/generated/querydsl'
+
 // def generated = 'src/main/generated'
+def generated = 'build/generated/querydsl'
 
 clean {
     delete file('src/main/generated')
     delete file(generated)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += generated
+        }
+    }
+
+    test {
+        java {
+            srcDirs += generated
+        }
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -85,10 +103,16 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 asciidoctor {
-    configurations 'asciidoctorExt' // (7)
-    baseDirFollowsSourceFile() // (8)
-    inputs.dir snippetsDir // (9)
-    dependsOn test // (10)
+    inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
+
+    sources { // 특정 파일만 html로 만든다.
+        include("**/index.adoc")
+    }
+
+    baseDirFollowsSourceFile()
+    dependsOn test
+
 }
 
 asciidoctor.doFirst {

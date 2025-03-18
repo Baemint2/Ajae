@@ -1,7 +1,8 @@
 package ajae.uhtm.repository;
 
 import ajae.uhtm.entity.*;
-import ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.domain.joke.Joke;
+import com.ajae.uhtm.repository.user.UserRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +13,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static ajae.uhtm.entity.QBookmark.bookmark;
-import static ajae.uhtm.entity.QJoke.joke;
-import static ajae.uhtm.entity.QUser.user;
+import static com.ajae.uhtm.domain.bookmark.QBookmark.bookmark;
+import static com.ajae.uhtm.domain.joke.QJoke.joke;
+import static com.ajae.uhtm.domain.user.QUser.user;
 
 @Slf4j
 @SpringBootTest
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     UserRepository userRepository;

@@ -1,8 +1,8 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.auth.oauth2.OAuth2UserService;
-import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.domain.user.User;
+import com.ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

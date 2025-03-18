@@ -1,13 +1,16 @@
 package ajae.uhtm.service;
 
-import ajae.uhtm.dto.joke.JokeDto;
-import ajae.uhtm.entity.Bookmark;
-import ajae.uhtm.entity.Joke;
-import ajae.uhtm.entity.JokeType;
-import ajae.uhtm.entity.User;
-import ajae.uhtm.repository.bookmark.BookmarkRepository;
-import ajae.uhtm.repository.joke.JokeRepository;
-import ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.domain.joke.Joke;
+import com.ajae.uhtm.domain.joke.JokeType;
+import com.ajae.uhtm.domain.user.User;
+import com.ajae.uhtm.dto.joke.JokeDto;
+import com.ajae.uhtm.domain.bookmark.Bookmark;
+import com.ajae.uhtm.repository.bookmark.BookmarkRepository;
+import com.ajae.uhtm.repository.joke.JokeRepository;
+import com.ajae.uhtm.repository.user.UserRepository;
+import com.ajae.uhtm.service.BookmarkService;
+import com.ajae.uhtm.service.JokeService;
+import com.ajae.uhtm.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
