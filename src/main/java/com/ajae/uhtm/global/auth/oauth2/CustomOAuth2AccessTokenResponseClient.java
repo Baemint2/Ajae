@@ -1,6 +1,7 @@
 package com.ajae.uhtm.global.auth.oauth2;
 
 import com.ajae.uhtm.dto.TokenResponse;
+import com.ajae.uhtm.dto.user.OauthProviderConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,8 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenRespon
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 public class CustomOAuth2AccessTokenResponseClient implements OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> {
 
@@ -58,19 +61,7 @@ public class CustomOAuth2AccessTokenResponseClient implements OAuth2AccessTokenR
 
     @Override
     public OAuth2AccessTokenResponse getTokenResponse(OAuth2AuthorizationCodeGrantRequest authorizationGrantRequest) {
-        RestTemplate rt = new RestTemplate();
-
-        String code = authorizationGrantRequest
-                        .getAuthorizationExchange()
-                        .getAuthorizationResponse()
-                        .getCode();
-
-        // HttpHeaders 오브젝트 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
-
-        String registrationId = authorizationGrantRequest.getClientRegistration().getRegistrationId();
-        TokenResponse tokenResponse = requestToken(code, headers, rt, registrationId);
+        TokenResponse tokenResponse = requestToken(authorizationGrantRequest);
 
         return OAuth2AccessTokenResponse.withToken(tokenResponse.getAccessToken()) // 실제 토큰 값으로 변경해야 함
                 .tokenType(OAuth2AccessToken.TokenType.BEARER)
@@ -78,31 +69,52 @@ public class CustomOAuth2AccessTokenResponseClient implements OAuth2AccessTokenR
                 .build();
     }
 
-    private TokenResponse requestToken(String code, HttpHeaders headers, RestTemplate rt, String registrationId) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("grant_type", grantType); // 값을 변수화하는게 낫다
-        params.add("code", code);
+    private TokenResponse requestToken(OAuth2AuthorizationCodeGrantRequest oauth2GrantRequest) {
+        RestTemplate rt = new RestTemplate();
 
-        switch (registrationId) {
-            case "google":
-                params.add("client_id", googleClientId);
-                params.add("redirect_uri", googleRedirectUri);
-                params.add("client_secret", googleClientSecret);
-                return exchangeToken(kakaoTokenUri, headers, params, rt);
-            case "naver":
-                params.add("client_id", naverClientId);
-                params.add("redirect_uri", naverRedirectUri);
-                params.add("client_secret", naverClientSecret);
-                return exchangeToken(naverTokenUri, headers, params, rt);
-            case "kakao":
-                params.add("client_id", kakaoClientId);
-                params.add("redirect_uri", kakaoRedirectUrl);
-                params.add("client_secret", kakaoClientSecret);
-                return exchangeToken(kakaoTokenUri, headers, params, rt);
-            default:
-                throw new IllegalArgumentException("지원되지 않는 제공자입니다. : " + registrationId);
-        }
+        String code = oauth2GrantRequest
+                .getAuthorizationExchange()
+                .getAuthorizationResponse()
+                .getCode();
+
+        // HttpHeaders 오브젝트 생성
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        String registrationId = oauth2GrantRequest
+                .getClientRegistration()
+                .getRegistrationId();
+
+        return requestToken(code, headers, rt, registrationId);
     }
+
+    private TokenResponse requestToken(String code, HttpHeaders headers, RestTemplate rt, String registrationId) {
+
+        Map<String, OauthProviderConfig> providerConfig = Map.of(
+                "google", new OauthProviderConfig(googleClientId, googleRedirectUri, googleClientSecret, googleTokenUri),
+                "kakao", new OauthProviderConfig(kakaoClientId, kakaoRedirectUrl, kakaoClientSecret, kakaoTokenUri),
+                "naver", new OauthProviderConfig(naverClientId, naverRedirectUri, naverClientSecret, naverTokenUri)
+        );
+
+        OauthProviderConfig config = providerConfig.get(registrationId);
+        if (config == null) {
+            throw new IllegalArgumentException("지원되지 않는 제공자입니다. : " + registrationId);
+        }
+
+        MultiValueMap<String, String> params = createTokenRequestParams(code, config);
+        return exchangeToken(config.getTokenUri(), headers, params, rt);
+    }
+
+    private MultiValueMap<String, String> createTokenRequestParams(String code, OauthProviderConfig config) {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", grantType);
+        params.add("code", code);
+        params.add("client_id", config.getClientId());
+        params.add("redirect_uri", config.getRedirectUri());
+        params.add("client_secret", config.getClientSecret());
+        return params;
+    }
+
 
     private TokenResponse exchangeToken(String tokenUri, HttpHeaders headers, MultiValueMap<String, String> params, RestTemplate rt) {
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(params, headers);

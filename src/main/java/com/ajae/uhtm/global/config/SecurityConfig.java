@@ -64,6 +64,6 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
-        return new CustomOAuth2AccessTokenResponseClient(); // 커스텀 클라이언트 빈 등록
+        return new CustomOAuth2AccessTokenResponseClient();
     }
 }
