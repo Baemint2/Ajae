@@ -25,25 +25,26 @@ public class UserService {
     }
 
     @Transactional
-    public User saveUserIfNotExist(String providerId, String email, String nickname, String profile, ProviderType providerType) {
+    public void saveUserIfNotExist(String providerId, String email, String nickname, String profile, ProviderType providerType) {
         log.info("[saveUserIfNotExist] providerId: {}", providerId);
         User existUser = userRepository.findByProviderKey(providerId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-        System.out.println("[saveUserIfNotExist] = " + existUser);
-        if(existUser == null) {
-            User user = User.builder()
-                    .email(email)
-                    .nickname(nickname)
-                    .profile(profile)
-                    .providerKey(providerId)
-                    .providerType(providerType)
-                    .role(Role.USER)
-                    .build();
-            userRepository.save(user);
-        }
+                .orElse(saveUser(providerId, email, nickname, profile, providerType));
+        log.info("[saveUserIfNotExist] = {}", existUser);
 
         existUser.changeLastLoginDate();
-        return existUser;
+    }
+
+    private User saveUser(String providerId, String email, String nickname, String profile, ProviderType providerType) {
+        User user = User.builder()
+                .email(email)
+                .nickname(nickname)
+                .profile(profile)
+                .providerKey(providerId)
+                .providerType(providerType)
+                .role(Role.USER)
+                .build();
+        userRepository.save(user);
+        return user;
     }
 
 

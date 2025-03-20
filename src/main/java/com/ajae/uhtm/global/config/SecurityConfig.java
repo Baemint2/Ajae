@@ -5,6 +5,7 @@ import com.ajae.uhtm.global.auth.LoginSuccessHandler;
 import com.ajae.uhtm.global.auth.UserSecurityService;
 import com.ajae.uhtm.global.auth.oauth2.CustomOAuth2AccessTokenResponseClient;
 import com.ajae.uhtm.global.auth.oauth2.OAuth2UserService;
+import com.ajae.uhtm.global.auth.oauth2.OauthProviderConfigService;
 import com.ajae.uhtm.global.filter.JwtAuthorizationFilter;
 import com.ajae.uhtm.global.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final OAuth2UserService oAuth2UserService;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final OauthProviderConfigService providerConfigService;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -64,6 +66,6 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> accessTokenResponseClient() {
-        return new CustomOAuth2AccessTokenResponseClient();
+        return new CustomOAuth2AccessTokenResponseClient(providerConfigService);
     }
 }

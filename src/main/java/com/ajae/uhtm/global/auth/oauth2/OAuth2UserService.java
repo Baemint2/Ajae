@@ -48,6 +48,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             case "google":
                 googleOauth(oAuth2User);
                 break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + userRequest.getClientRegistration().getRegistrationId());
         }
 
         return new DefaultOAuth2User(authorities, oAuth2User.getAttributes(), userNameAttributeName);
@@ -69,8 +71,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private void kakaoOauth(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
-        String providerId = attributes.get("id").toString();
         Map<String, Object> properties = oAuth2User.getAttribute("properties");
+
+        String providerId = attributes.get("id").toString();
         String nickname = (String) properties.get("nickname");
         String profile = (String) properties.get("profile_image");
 
