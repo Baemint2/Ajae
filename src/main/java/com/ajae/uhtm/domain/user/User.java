@@ -5,6 +5,7 @@ import com.ajae.uhtm.dto.user.UserDto;
 import com.ajae.uhtm.dto.user.UserInfoDto;
 import com.ajae.uhtm.domain.BaseTimeEntity;
 import com.ajae.uhtm.domain.userJoke.UserJoke;
+import com.ajae.uhtm.global.auth.oauth2.OauthResponse;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -59,7 +60,7 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(String username, String password, String email, String profile, String nickname, Role role, ProviderType providerType, String providerKey, boolean isDeleted, LocalDateTime lastLogin) {
+    private User(String username, String password, String email, String profile, String nickname, Role role, ProviderType providerType, String providerKey, boolean isDeleted, LocalDateTime lastLogin) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -70,6 +71,17 @@ public class User extends BaseTimeEntity {
         this.providerKey = providerKey;
         this.isDeleted = isDeleted;
         this.lastLogin = lastLogin;
+    }
+
+    public static User create(OauthResponse response) {
+        return User.builder()
+                .email(response.getEmail())
+                .nickname(response.getNickname())
+                .profile(response.getProfile())
+                .providerKey(response.getProviderId())
+                .providerType(response.getProviderType())
+                .role(Role.USER)
+                .build();
     }
 
     public UserDto toDto() {

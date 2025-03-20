@@ -23,6 +23,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
+    public static final String EMAIL = "email";
+    public static final String ID = "id";
     private final UserService userService;
 
     @Override
@@ -39,17 +41,15 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                 .getUserInfoEndpoint()
                 .getUserNameAttributeName();
         log.info("userNameAttributeName: {}", userNameAttributeName);
-        switch (userRequest.getClientRegistration().getRegistrationId()) {
-            case "naver":
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+
+        switch (registrationId) {
+            case "naver" -> {
                 return naverOauth(oAuth2User, authorities);
-            case "kakao":
-                kakaoOauth(oAuth2User);
-                break;
-            case "google":
-                googleOauth(oAuth2User);
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + userRequest.getClientRegistration().getRegistrationId());
+            }
+            case "kakao" -> kakaoOauth(oAuth2User);
+            case "google" -> googleOauth(oAuth2User);
+            default -> throw new IllegalStateException("Unexpected value: " + registrationId);
         }
 
         return new DefaultOAuth2User(authorities, oAuth2User.getAttributes(), userNameAttributeName);
@@ -57,40 +57,44 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private OAuth2User naverOauth(OAuth2User oAuth2User, List<GrantedAuthority> authorities) {
         Map<String, Object> response = oAuth2User.getAttribute("response");
-        String providerId = (String) response.get("id");
-        String email = (String) response.get("email");
+        String providerId = (String) response.get(ID);
+        String email = (String) response.get(EMAIL);
         String profile = (String) response.get("profile_image");
         String nickname = (String) response.get("name");
-        userService.saveUserIfNotExist(providerId, email, nickname, profile, ProviderType.NAVER);
+        OauthResponse oauthResponse = OauthResponse.create(providerId, email, profile, nickname, ProviderType.NAVER);
+        userService.saveUserIfNotExist(oauthResponse);
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("id", providerId);
+        attributes.put(ID, providerId);
 
-        return new DefaultOAuth2User(authorities, attributes, "id");
+        return new DefaultOAuth2User(authorities, attributes, ID);
     }
 
     private void kakaoOauth(OAuth2User oAuth2User) {
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Map<String, Object> properties = oAuth2User.getAttribute("properties");
 
-        String providerId = attributes.get("id").toString();
+        String providerId = attributes.get(ID).toString();
         String nickname = (String) properties.get("nickname");
         String profile = (String) properties.get("profile_image");
 
         Map<String, Object> kakaoAccount = oAuth2User.getAttribute("kakao_account");
-        String email = (String) kakaoAccount.get("email");
-        userService.saveUserIfNotExist(providerId, email, nickname, profile, ProviderType.KAKAO);
+        String email = (String) kakaoAccount.get(EMAIL);
+
+        OauthResponse oauthResponse = OauthResponse.create(providerId, email, profile, nickname, ProviderType.KAKAO);
+
+        userService.saveUserIfNotExist(oauthResponse);
     }
 
     private void googleOauth(OAuth2User oAuth2User) {
-        log.info("googleOauth 호출");
         Map<String, Object> attributes = oAuth2User.getAttributes();
         String providerId = (String) attributes.get("sub");
         String nickname = (String) attributes.get("name");
         String profile = (String) attributes.get("picture");
-        String email = (String) attributes.get("email");
+        String email = (String) attributes.get(EMAIL);
 
-        userService.saveUserIfNotExist(providerId, email, nickname, profile, ProviderType.GOOGLE);
+        OauthResponse oauthResponse = OauthResponse.create(providerId, email, profile, nickname, ProviderType.GOOGLE);
+        userService.saveUserIfNotExist(oauthResponse);
     }
 
 

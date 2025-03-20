@@ -20,6 +20,7 @@ import java.util.List;
 public class UserSecurityService implements UserDetailsService {
 
     private final UserService userService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.findByUsername(username);
