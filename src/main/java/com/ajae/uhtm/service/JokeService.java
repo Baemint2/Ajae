@@ -1,12 +1,11 @@
 package com.ajae.uhtm.service;
 
-import com.ajae.uhtm.global.utils.CsvReader;
-import com.ajae.uhtm.dto.joke.JokeDto;
+import com.ajae.uhtm.domain.joke.Joke;
 import com.ajae.uhtm.domain.joke.JokeType;
 import com.ajae.uhtm.domain.user.User;
 import com.ajae.uhtm.domain.userJoke.UserJoke;
+import com.ajae.uhtm.dto.joke.JokeDto;
 import com.ajae.uhtm.repository.joke.JokeRepository;
-import com.ajae.uhtm.domain.joke.Joke;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,13 +25,9 @@ public class JokeService {
 
     private final UserJokeService userJokeService;
 
-    private final CsvReader csvReader;
-
     @Transactional
-    public void importData(String filePath) {
-        List<Joke> dataList = csvReader.readCsv(filePath);
-        log.info("[importData] : {}", dataList.size());
-        jokeRepository.saveAll(dataList);
+    public List<Joke> importData(List<Joke> jokeResponse) {
+        return jokeRepository.saveAll(jokeResponse);
     }
 
     @Transactional

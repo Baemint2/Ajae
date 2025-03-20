@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.time.LocalDateTime.now;
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -53,6 +55,15 @@ public class Joke extends BaseTimeEntity {
 
     public JokeDto toDto() {
         return new JokeDto(this.id, this.question, this.answer, this.jokeType, this.getCreatedAt());
+    }
+
+    public static Joke create(String question, String answer) {
+        return Joke.builder()
+                .question(question)
+                .answer(answer)
+                .jokeType(JokeType.DEFAULT)
+                .createdAt(now())
+                .build();
     }
 
     public JokeRequestDto toRequestDto() {

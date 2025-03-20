@@ -1,5 +1,6 @@
 package com.ajae.uhtm.controller.sheet;
 
+import com.ajae.uhtm.domain.joke.Joke;
 import com.ajae.uhtm.service.GoogleSheetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,7 @@ public class GoogleSheetController {
     private final GoogleSheetService googleSheetService;
 
     @GetMapping("/read")
-    public List<List<Object>> readSheet() throws IOException {
+    public List<Joke> readSheet() throws IOException {
         return googleSheetService.readSheet();
     }
 }
