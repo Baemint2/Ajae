@@ -136,6 +136,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return requestURI.equals("/api/v1/loginCheck") ||
                 requestURI.equals("/api/v1/userInfo") ||
                 requestURI.equals("/api/v1/allUserJoke") ||
+                requestURI.equals("/api/sheet/read") ||
                 requestURI.equals("/api/v1/userJoke");
     }
 }
