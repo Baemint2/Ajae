@@ -57,11 +57,11 @@ public class Joke extends BaseTimeEntity {
         return new JokeDto(this.id, this.question, this.answer, this.jokeType, this.getCreatedAt());
     }
 
-    public static Joke create(String question, String answer) {
+    public static Joke create(String question, String answer, JokeType jokeType) {
         return Joke.builder()
                 .question(question)
                 .answer(answer)
-                .jokeType(JokeType.DEFAULT)
+                .jokeType(jokeType)
                 .createdAt(now())
                 .build();
     }

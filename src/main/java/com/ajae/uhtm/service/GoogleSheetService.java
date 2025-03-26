@@ -1,6 +1,7 @@
 package com.ajae.uhtm.service;
 
 import com.ajae.uhtm.domain.joke.Joke;
+import com.ajae.uhtm.domain.joke.JokeType;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -70,7 +71,7 @@ public class GoogleSheetService {
 
         for (List<Object> value : values) {
             log.info("{}, {} ", value.get(0).toString(), value.get(1).toString());
-            jokeResponse.add(Joke.create(value.get(0).toString(), value.get(1).toString()));
+            jokeResponse.add(Joke.create(value.get(0).toString(), value.get(1).toString(), JokeType.DEFAULT));
         }
 
         return jokeService.importData(jokeResponse);

@@ -58,26 +58,14 @@ public class JokeService {
 
     @Transactional
     public Joke saveJoke(Joke joke, String username) {
-        Joke joke2 = Joke.builder()
-                .question(joke.getQuestion())
-                .answer(joke.getAnswer())
-                .jokeType(JokeType.USER_ADDED)
-                .build();
-
-        Joke save = jokeRepository.save(joke2);
+        Joke joke2 = Joke.create(joke.getQuestion(), joke.getAnswer(), JokeType.USER_ADDED);
+        Joke savedJoke = jokeRepository.save(joke2);
         User user = userService.findByUsername(username);
 
-        if (user == null) {
-            throw new IllegalArgumentException("User not found for username: " + username);
-        }
-
-        UserJoke userJoke = UserJoke.builder()
-                .joke(save)
-                .user(user)
-                .build();
+        UserJoke userJoke = UserJoke.create(savedJoke, user);
         userJokeService.saveUserJoke(userJoke);
 
-        return save;
+        return savedJoke;
     }
 
     @Transactional
