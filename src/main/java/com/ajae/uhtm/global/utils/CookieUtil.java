@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class CookieUtil {
 
     private CookieUtil() {
+        throw new IllegalStateException("Utility class");
     }
 
     public static void createCookie(HttpServletResponse response, String name, int maxAge) {

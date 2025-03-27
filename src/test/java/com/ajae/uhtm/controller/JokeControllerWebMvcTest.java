@@ -11,7 +11,8 @@ import com.ajae.uhtm.global.auth.CustomUserDetails;
 import com.ajae.uhtm.global.auth.UserSecurityService;
 import com.ajae.uhtm.global.config.SecurityConfig;
 import com.ajae.uhtm.global.filter.JwtAuthorizationFilter;
-import com.ajae.uhtm.global.utils.JwtUtil;
+import com.ajae.uhtm.global.utils.JwtTokenFactory;
+import com.ajae.uhtm.global.utils.JwtVerifier;
 import com.ajae.uhtm.repository.joke.JokeRepository;
 import com.ajae.uhtm.repository.userjoke.UserJokeRepository;
 import com.ajae.uhtm.service.JokeService;
@@ -43,7 +44,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -55,13 +55,11 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.ajae.uhtm.global.utils.JwtUtil.EXP_LONG;
-import static com.ajae.uhtm.global.utils.JwtUtil.TOKEN_PREFIX;
+import static com.ajae.uhtm.global.utils.JwtTokenFactory.EXP_LONG;
+import static com.ajae.uhtm.global.utils.JwtVerifier.TOKEN_PREFIX;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
@@ -85,7 +83,10 @@ class JokeControllerWebMvcTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private JwtUtil jwtUtil;
+    private JwtVerifier jwtVerifier;
+
+    @MockBean
+    private JwtTokenFactory jwtTokenFactory;
 
     @MockBean
     private UserSecurityService userSecurityService;
@@ -117,7 +118,7 @@ class JokeControllerWebMvcTest {
 
     UserJoke testUserJoke, testUserJoke2;
 
-    private SecretKey key;
+    SecretKey key;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -128,7 +129,7 @@ class JokeControllerWebMvcTest {
     void setUp(WebApplicationContext webApplicationContext, RestDocumentationContextProvider restDocumentation) {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
-                .addFilters(new JwtAuthorizationFilter(jwtUtil, userSecurityService))
+                .addFilters(new JwtAuthorizationFilter(jwtVerifier, userSecurityService))
                 .apply(documentationConfiguration(restDocumentation))
                 .defaultRequest(post("/**").with(csrf()))
                 .defaultRequest(delete("/**").with(csrf()))
@@ -170,10 +171,9 @@ class JokeControllerWebMvcTest {
                 .build();
         testUserJoke.testUserJokeId(2L);
 
-        doNothing().when(jwtUtil).init();
 
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        when(jwtUtil.getKey()).thenReturn(key);
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        when(jwtTokenFactory.getKey()).thenReturn(key);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
@@ -182,7 +182,7 @@ class JokeControllerWebMvcTest {
 
         when(userSecurityService.loadUserByUsername(auth.getName())).thenReturn(new CustomUserDetails(testUser.toDto(), authorities));
 
-        when(jwtUtil.createAccessToken(auth)).thenReturn(Jwts.builder()
+        when(jwtTokenFactory.createAccessToken(auth)).thenReturn(Jwts.builder()
                 .issuer("moz1mozi.com")
                 .subject(auth.getName())
                 .expiration(new Date(System.currentTimeMillis() + EXP_LONG))
@@ -191,9 +191,9 @@ class JokeControllerWebMvcTest {
                 .signWith(key)
                 .compact());
 
-        String jwtToken = jwtUtil.createAccessToken(auth);
-        when(jwtUtil.validateToken(jwtToken)).thenReturn(true);
-        when(jwtUtil.verify(jwtToken)).thenReturn(Jwts.parser()
+        String jwtToken = jwtTokenFactory.createAccessToken(auth);
+        when(jwtVerifier.validateToken(jwtToken)).thenReturn(true);
+        when(jwtVerifier.verify(jwtToken)).thenReturn(Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(jwtToken.replace(TOKEN_PREFIX, ""))
@@ -305,7 +305,8 @@ class JokeControllerWebMvcTest {
                                 fieldWithPath("sort.unsorted").description("미정렬 여부"),
                                 fieldWithPath("numberOfElements").description("현재 페이지의 요소 수"),
                                 fieldWithPath("empty").description("페이지가 비어 있는지 여부")
-                        )));
+                        )))
+                .andExpect(status().isOk());
     }
 
     @Test

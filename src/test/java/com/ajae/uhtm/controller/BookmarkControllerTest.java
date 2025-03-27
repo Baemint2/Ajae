@@ -10,7 +10,8 @@ import com.ajae.uhtm.global.auth.CustomUserDetails;
 import com.ajae.uhtm.global.auth.UserSecurityService;
 import com.ajae.uhtm.global.config.SecurityConfig;
 import com.ajae.uhtm.global.filter.JwtAuthorizationFilter;
-import com.ajae.uhtm.global.utils.JwtUtil;
+import com.ajae.uhtm.global.utils.JwtTokenFactory;
+import com.ajae.uhtm.global.utils.JwtVerifier;
 import com.ajae.uhtm.repository.bookmark.BookmarkRepository;
 import com.ajae.uhtm.service.BookmarkService;
 import com.ajae.uhtm.service.UserService;
@@ -49,10 +50,8 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.crypto.SecretKey;
 import java.util.*;
 
-import static com.ajae.uhtm.global.utils.JwtUtil.EXP_LONG;
-import static com.ajae.uhtm.global.utils.JwtUtil.TOKEN_PREFIX;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.ajae.uhtm.global.utils.JwtTokenFactory.EXP_LONG;
+import static com.ajae.uhtm.global.utils.JwtVerifier.TOKEN_PREFIX;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -95,7 +94,9 @@ class BookmarkControllerTest {
     OAuth2UserService oAuth2UserService;
 
     @MockBean
-    private JwtUtil jwtUtil;
+    private JwtTokenFactory jwtTokenFactory;
+    @MockBean
+    private JwtVerifier jwtVerifier;
 
     @MockBean
     private UserSecurityService userSecurityService;
@@ -112,7 +113,7 @@ class BookmarkControllerTest {
 
     Bookmark testBookmark, testBookmark2;
 
-    private SecretKey key;
+    SecretKey key;
 
     @Value("${jwt.secret}")
     private String secretKey;
@@ -124,7 +125,7 @@ class BookmarkControllerTest {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(documentationConfiguration(restDocumentation))
                 .apply(springSecurity())
-                .addFilters(new JwtAuthorizationFilter(jwtUtil, userSecurityService))
+                .addFilters(new JwtAuthorizationFilter(jwtVerifier, userSecurityService))
                 .defaultRequest(post("/**").with(csrf()))
                 .defaultRequest(delete("/**").with(csrf()))
                 .build();
@@ -163,10 +164,8 @@ class BookmarkControllerTest {
         testBookmark.testBookmarkId(99998L);
         testBookmark2.testBookmarkId(99999L);
 
-        doNothing().when(jwtUtil).init();
-
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-        when(jwtUtil.getKey()).thenReturn(key);
+        key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        when(jwtTokenFactory.getKey()).thenReturn(key);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
@@ -175,7 +174,7 @@ class BookmarkControllerTest {
 
         when(userSecurityService.loadUserByUsername(auth.getName())).thenReturn(new CustomUserDetails(testUser.toDto(), authorities));
 
-        when(jwtUtil.createAccessToken(auth)).thenReturn(Jwts.builder()
+        when(jwtTokenFactory.createAccessToken(auth)).thenReturn(Jwts.builder()
                 .issuer("moz1mozi.com")
                 .subject(auth.getName())
                 .expiration(new Date(System.currentTimeMillis() + EXP_LONG))
@@ -184,9 +183,9 @@ class BookmarkControllerTest {
                 .signWith(key)
                 .compact());
 
-        String jwtToken = jwtUtil.createAccessToken(auth);
-        when(jwtUtil.validateToken(jwtToken)).thenReturn(true);
-        when(jwtUtil.verify(jwtToken)).thenReturn(Jwts.parser()
+        String jwtToken = jwtTokenFactory.createAccessToken(auth);
+        when(jwtVerifier.validateToken(jwtToken)).thenReturn(true);
+        when(jwtVerifier.verify(jwtToken)).thenReturn(Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(jwtToken.replace(TOKEN_PREFIX, ""))

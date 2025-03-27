@@ -1,77 +1,29 @@
 package com.ajae.uhtm.global.utils;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.annotation.PostConstruct;
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.security.SignatureException;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
-@Getter
 @Component
-public class JwtUtil {
+@RequiredArgsConstructor
+public class JwtVerifier {
 
-    public static final String ISSUER = "moz1mozi.com";
-    public static final int EXP_SHORT = 15 * 60 * 1000; // 15분
-    public static final int EXP_LONG = 60 * 60 * 1000;  // 1시간
-    public static final int REFRESH_EXP = 7 * 24 * 60 * 60 * 1000; // 7일
+    private final JwtTokenFactory jwtTokenFactory;
+
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final String HEADER = "Authorization";
-
-    private SecretKey key;
-
-    @Value("${jwt.secret}")
-    private String secretKey;
-
-    @PostConstruct
-    public void init() {
-        this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
-    }
-
-    public String createAccessToken(Authentication auth) {
-        String username = auth.getName();
-        String authorities = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        return Jwts.builder()
-                .issuer(ISSUER)
-                .subject(username)
-                .expiration(new Date(System.currentTimeMillis() + EXP_LONG))
-                .claim("username", username)
-                .claim("role", authorities)
-                .signWith(key)
-                .compact();
-    }
-
-    public String createRefreshToken(Authentication auth) {
-        String username = auth.getName();
-
-        return Jwts.builder()
-                .issuer(ISSUER)
-                .subject(username)
-                .expiration(new Date(System.currentTimeMillis() + REFRESH_EXP))
-                .signWith(key)
-                .compact();
-    }
 
     public Claims verify(String token) {
         try {
             return Jwts.parser()
-                    .verifyWith(key)
+                    .verifyWith(jwtTokenFactory.getKey())
                     .build()
                     .parseSignedClaims(token.replace(TOKEN_PREFIX, ""))
                     .getPayload();
@@ -80,7 +32,7 @@ public class JwtUtil {
             throw e;
         } catch (JwtException | IllegalArgumentException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
-            return null;
+            throw e;
         }
     }
 

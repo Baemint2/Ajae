@@ -3,7 +3,7 @@ package com.ajae.uhtm.global.filter;
 
 import com.ajae.uhtm.global.auth.CustomUserDetails;
 import com.ajae.uhtm.global.auth.UserSecurityService;
-import com.ajae.uhtm.global.utils.JwtUtil;
+import com.ajae.uhtm.global.utils.JwtVerifier;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -21,13 +21,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.ajae.uhtm.global.utils.ExcludedPath.isExcludedPath;
+import static com.ajae.uhtm.global.utils.ExcludedPath.isTokenExcluded;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    public static final String ACCESS_TOKEN = "accessToken";
+    public static final String REFRESH_TOKEN = "refreshToken";
+    private final JwtVerifier jwtVerifier;
     private final UserSecurityService userSecurityService;
 
     @Override
@@ -39,59 +47,70 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (token != null) {
-            try {
-                if (jwtUtil.validateToken(token)) {
-                    Claims claims = jwtUtil.verify(token);
-                    log.info("claims: {}", claims);
-                    String username = claims.getSubject();
-                    log.info("Username from token: {}", username);
-
-                    UserDetails userDetails = userSecurityService.loadUserByUsername(username);
-                    UsernamePasswordAuthenticationToken authentication = getAuthentication(userDetails, request);
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    log.info("Invalid JWT token");
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-                    return;
-                }
-            } catch (ExpiredJwtException ex) {
-                log.info("Expired JWT token");
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Expired JWT token");
-                return;
-            } catch (Exception e) {
-                log.error("JWT Authentication failed", e);
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT Authentication failed");
-                return;
-            }
-        } else {
+        if (token == null) {
             log.info("Token is null");
             if (!isTokenExcluded(request.getRequestURI())) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token is null");
+                return;
             }
-            SecurityContextHolder.getContext();
+            logRequestExecutionTime(request, chain, response);
+            return;
+        }
+
+        try {
+            if (!jwtVerifier.validateToken(token)) {
+                log.info("Invalid JWT token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+                return;
+            }
+            Claims claims = jwtVerifier.verify(token);
+            log.info("claims: {}", claims);
+            String username = claims.getSubject();
+            log.info("Username from token: {}", username);
+
+            UserDetails userDetails = userSecurityService.loadUserByUsername(username);
+            UsernamePasswordAuthenticationToken authentication = getAuthentication(userDetails, request);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (ExpiredJwtException ex) {
+            log.info("Expired JWT token");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Expired JWT token");
+            return;
+
+        } catch (Exception e) {
+            log.error("JWT Authentication failed", e);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT Authentication failed");
+            return;
         }
         logRequestExecutionTime(request, chain, response);
     }
 
     private String resolveToken(HttpServletRequest request) {
-        String header = request.getHeader(JwtUtil.HEADER);
-        log.info("header: {}", header);
-        if (header == null || !header.startsWith(JwtUtil.TOKEN_PREFIX)) {
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("accessToken")) {
-                        return cookie.getValue();
-                    } else if (cookie.getName().equals("refreshToken")) {
-                        return cookie.getValue();
-                    }
-                }
-            }
-        } else {
-            return header.replace(JwtUtil.TOKEN_PREFIX, "");
+        String token = extractTokenFromHeader(request);
+        return (token != null) ? token : extractTokenFromCookies(request);
+    }
+
+    private static String extractTokenFromHeader(HttpServletRequest request) {
+        String header = request.getHeader(JwtVerifier.HEADER);
+        if (header != null && header.startsWith(JwtVerifier.TOKEN_PREFIX)) {
+            return header.replace(JwtVerifier.TOKEN_PREFIX, "");
         }
+        return null;
+    }
+
+    private static String extractTokenFromCookies(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length == 0) return null;
+
+        Map<String, String> cookieMap = Arrays.stream(cookies)
+                .collect(Collectors.toMap(Cookie::getName, Cookie::getValue, (a, b) -> b));
+
+        if (cookieMap.containsKey(ACCESS_TOKEN)) {
+            return cookieMap.get(ACCESS_TOKEN);
+        } else if (cookieMap.containsKey(REFRESH_TOKEN)) {
+            return cookieMap.get(REFRESH_TOKEN);
+        }
+
         return null;
     }
 
@@ -114,29 +133,5 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             long executionTime = System.currentTimeMillis() - start;
             log.info("요청 [{}] 완료: 실행 시간 {} ms", request.getRequestURI(), executionTime);
         }
-    }
-
-    private boolean isExcludedPath(String requestURI, String method) {
-        return requestURI.equals("/login") ||
-//                requestURI.equals("/api/auth/logout/v1") ||
-//                requestURI.equals("/user/login") ||
-                requestURI.equals("/logout") ||
-                requestURI.contains("/css/style") ||
-                requestURI.startsWith("/static/") ||
-                requestURI.contains("/img/") ||
-                requestURI.contains("manifest") ||
-                requestURI.contains("/login.js") ||
-                requestURI.startsWith("/oauth2/authorization") ||  // OAuth2 로그인 요청 경로
-                requestURI.startsWith("/login/oauth2/code") ||
-                requestURI.equals("/api/v1/joke") && method.equalsIgnoreCase("GET") ||
-                requestURI.startsWith("/api/v1/check") ;
-    }
-
-    private boolean isTokenExcluded(String requestURI) {
-        return requestURI.equals("/api/v1/loginCheck") ||
-                requestURI.equals("/api/v1/userInfo") ||
-                requestURI.equals("/api/v1/allUserJoke") ||
-                requestURI.equals("/api/sheet/read") ||
-                requestURI.equals("/api/v1/userJoke");
     }
 }

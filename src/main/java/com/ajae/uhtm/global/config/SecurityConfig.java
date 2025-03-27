@@ -7,7 +7,8 @@ import com.ajae.uhtm.global.auth.oauth2.CustomOAuth2AccessTokenResponseClient;
 import com.ajae.uhtm.global.auth.oauth2.OAuth2UserService;
 import com.ajae.uhtm.global.auth.oauth2.OauthProviderConfigService;
 import com.ajae.uhtm.global.filter.JwtAuthorizationFilter;
-import com.ajae.uhtm.global.utils.JwtUtil;
+import com.ajae.uhtm.global.utils.JwtTokenFactory;
+import com.ajae.uhtm.global.utils.JwtVerifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,7 +42,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtUtil jwtUtil, UserSecurityService userSecurityService) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http,
+                                    JwtTokenFactory jwtTokenFactory,
+                                    JwtVerifier jwtVerifier,
+                                    UserSecurityService userSecurityService) throws Exception {
         http
             .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
@@ -55,12 +59,12 @@ public class SecurityConfig {
                     userInfo.userService(oAuth2UserService))
                     .tokenEndpoint(token ->
                             token.accessTokenResponseClient(accessTokenResponseClient()))
-                    .successHandler(new LoginSuccessHandler(jwtUtil))
+                    .successHandler(new LoginSuccessHandler(jwtTokenFactory, jwtVerifier))
             )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                .addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userSecurityService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthorizationFilter(jwtVerifier, userSecurityService), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
